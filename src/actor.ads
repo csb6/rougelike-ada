@@ -1,4 +1,5 @@
 with Item; use Item;
+with Display;
 
 package Actor is
    -- These are the variable stats for each actor
@@ -6,18 +7,16 @@ package Actor is
    type Defense_Value is range 0 .. 50;
    type Energy is range 0 .. 5;
    type Health is range 0 .. 100;
-   type X_Pos is range 0 .. 30;
-   type Y_Pos is range 0 .. 30;
 
    type Equip_Slot is (Head, Chest, Legs, Feet, Melee, Ranged);
 
    -- Represents a certain 'type' or class of Actor (e.g. Tiger)
    type Actor_Type_Id is range 0 .. 30;
    -- Represents a certain Actor instance (e.g. Tony the Tiger)
-   type Actor_Id is range 0 .. 50;
+   subtype Actor_Id is Entity_Id range Item_Id'Last + 1 .. Entity_Id'Last;
    -- The player is their own type and instance. Both are at index 0
    -- in their respective arrays
-   Player_Id : constant Actor_Id := 0;
+   Player_Id : constant Actor_Id := Actor_Id'First;
    Player_Type_id : constant Actor_Type_Id := 0;
 
 
@@ -28,8 +27,8 @@ package Actor is
    end record;
 
    type Position is record
-      x : X_Pos;
-      y : Y_Pos;
+      x : Display.X_Pos;
+      y : Display.Y_Pos;
    end record;
 
    -- Each index is a homogenous stack of some entity's items

@@ -1,7 +1,8 @@
 with Actor;
+with Display;
 
 procedure Rougelike is
-
+   screen : Display.Manager;
 begin
-   null;
+   Display.clear;
 end Rougelike;

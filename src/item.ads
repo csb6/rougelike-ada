@@ -15,13 +15,17 @@ package Item is
       defense : Natural;
    end record;
 
-   type Item_Id is range 0 .. 100;
-   No_Item : constant Item_Id := 0;
+   -- A range of id values; certain subsets are various types of items
+   -- and others subsets are actors
+   type Entity_Id is range 0 .. 150;
+   No_Entity : constant Entity_Id := 0;
+   Floor_Icon : constant Character := '.';
+   subtype Item_Id is Entity_Id range 1 .. 99;
    
    subtype Weapon_Id is Item_Id range 1 .. 50;
-   subtype Melee_Weapon_Id is Weapon_Id range 1 .. 25;
+   subtype Melee_Weapon_Id is Weapon_Id range Weapon_Id'First .. 25;
    subtype Ranged_Weapon_Id is Weapon_Id range 26 .. Weapon_Id'Last;
-   subtype Armor_Id is Item_Id range 51 .. Item_Id'Last;
+   subtype Armor_Id is Item_Id range Weapon_Id'Last + 1 .. Item_Id'Last;
    
    type Melee_Weapon_Type_Array is array(Melee_Weapon_Id) of Weapon_Type;
    type Ranged_Weapon_Type_Array is array(Ranged_Weapon_Id) of Weapon_Type;
