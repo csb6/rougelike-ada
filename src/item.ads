@@ -1,7 +1,8 @@
-
+with Ada.Strings.Fixed;
 
 package Item is
-   type Name_String is new String(1 .. 16);
+   subtype Name_String is String(1 .. 16);
+   function add_padding(name : String) return Name_String;
 
    type Weapon_Type is record
      name : Name_String;
@@ -17,14 +18,14 @@ package Item is
 
    -- A range of id values; certain subsets are various types of items
    -- and others subsets are actors
-   type Entity_Id is range 0 .. 150;
+   type Entity_Id is range 0 .. 125;
    No_Entity : constant Entity_Id := 0;
    Floor_Icon : constant Character := '.';
    subtype Item_Id is Entity_Id range 1 .. 99;
    
    subtype Weapon_Id is Item_Id range 1 .. 50;
    subtype Melee_Weapon_Id is Weapon_Id range Weapon_Id'First .. 25;
-   subtype Ranged_Weapon_Id is Weapon_Id range 26 .. Weapon_Id'Last;
+   subtype Ranged_Weapon_Id is Weapon_Id range Melee_Weapon_Id'Last + 1 .. Weapon_Id'Last;
    subtype Armor_Id is Item_Id range Weapon_Id'Last + 1 .. Item_Id'Last;
    
    type Melee_Weapon_Type_Array is array(Melee_Weapon_Id) of Weapon_Type;

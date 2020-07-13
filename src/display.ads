@@ -7,13 +7,14 @@ package Display is
    -- Acts as Scope Guard; sets-up/cleans-up ncurses
    type Manager is new Ada.Finalization.Controlled with private;
    
-   
-   type X_Pos is private;
-   type Y_Pos is private;
+   Map_Width : constant := 30; -- in cells
+   Map_Height : constant := 30;
+   subtype X_Pos is Terminal_Interface.Curses.Column_Position range 0 .. Map_Width;
+   subtype Y_Pos is Terminal_Interface.Curses.Line_Position range 0 .. Map_Height;
    
    type Cell is record
       -- The ASCII character displayed on the terminal grid.
-      icon : Character;
+      icon : Character := '.';
       -- Holds an actor or some type of item
       entity : Item.Entity_Id := Item.No_Entity;
    end record;
@@ -27,8 +28,4 @@ private
    overriding procedure Initialize(self : in out Manager);
    -- Cleanup ncurses so that terminal emulator goes back to normal
    overriding procedure Finalize(self : in out Manager);
-   
-   
-   type X_Pos is new Terminal_Interface.Curses.Column_Count;
-   type Y_Pos is new Terminal_Interface.Curses.Line_Count;
 end Display;

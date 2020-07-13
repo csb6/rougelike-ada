@@ -8,9 +8,6 @@ package body Display is
    Input_Timeout : constant := 10; -- in ms
    Max_Log_Size : constant := 4; -- in number of messages
    
-   Map_Width : constant := 30; -- in cells
-   Map_Height : constant := 30;
-   
    -- NCurses global variables
    Cursor_Visibility : Curses.Cursor_Visibility := Curses.Invisible;
    

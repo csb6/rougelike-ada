@@ -57,5 +57,15 @@ package body Actor is
 
       self.size := self.size + 1;
    end add;
+   
+   procedure add(self : in out Actor_Table; kind : Actor_Type_Id;
+                 pos : Position; hp : Health) is
+   begin
+      self.kinds(self.size) := kind;
+      self.positions(self.size) := pos;
+      self.healths(self.size) := hp;
+      
+      self.size := self.size + 1;
+   end add;
      
 end Actor;
