@@ -4,13 +4,14 @@ with Item;
 
 package Display is
    
-   -- Acts as Scope Guard; sets-up/cleans-up ncurses
+   -- Acts as Scope Guard; sets-up/cleans-up ncurses, and caches some state
+   -- about the screen
    type Manager is new Ada.Finalization.Controlled with private;
    
    Map_Width : constant := 30; -- in cells
    Map_Height : constant := 30;
-   subtype X_Pos is Terminal_Interface.Curses.Column_Position range 0 .. Map_Width;
-   subtype Y_Pos is Terminal_Interface.Curses.Line_Position range 0 .. Map_Height;
+   type X_Pos is new Terminal_Interface.Curses.Column_Position range 0 .. Map_Width;
+   type Y_Pos is new Terminal_Interface.Curses.Line_Position range 0 .. Map_Height;
    
    type Cell is record
       -- The ASCII character displayed on the terminal grid.
@@ -22,8 +23,12 @@ package Display is
    procedure clear;
    procedure present;
    procedure print(column : X_Pos; row : Y_Pos; text : String);
+   function is_large_enough return Boolean;
 private
-   type Manager is new Ada.Finalization.Controlled with null record;
+   type Manager is new Ada.Finalization.Controlled with record
+      corner_x : X_Pos := 0;
+      corner_y : Y_Pos := 0;
+   end record;
    -- Setup ncurses
    overriding procedure Initialize(self : in out Manager);
    -- Cleanup ncurses so that terminal emulator goes back to normal
