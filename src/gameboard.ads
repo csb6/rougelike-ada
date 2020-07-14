@@ -3,8 +3,6 @@ with Item;
 with Display;
 
 package Gameboard is
-   type Grid is array(Display.Y_Pos, Display.X_Pos) of Display.Cell;
-   
    type Object is tagged private;
 
    procedure make(self : in out Object);
@@ -15,6 +13,6 @@ private
       item_types : Item.Item_Type_Table;
       actors : Actor.Actor_Table;
       
-      map : Grid;
+      map : Display.Grid;
    end record;
 end Gameboard;

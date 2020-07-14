@@ -1,15 +1,13 @@
 package body Display is
-   package Curses renames Terminal_Interface.Curses;
-   
+
    Min_Display_Width : constant := 30; -- in cells
    Min_Display_Height : constant := 16;
    GUI_Width : constant := 10; -- in cells
    GUI_Height : constant := 10;
    Input_Timeout : constant := 10; -- in ms
-   Max_Log_Size : constant := 4; -- in number of messages
    
    -- NCurses global variables
-   Cursor_Visibility : Curses.Cursor_Visibility := Curses.Invisible;
+   Current_Cursor_Visibility : Curses.Cursor_Visibility := Curses.Invisible;
    
    procedure Initialize(self : in out Manager) is
    begin
@@ -23,7 +21,7 @@ package body Display is
       end if;
       
       Curses.Move_Cursor(Line => 0, Column => 0);
-      Curses.Set_Cursor_Visibility(Cursor_Visibility);
+      Curses.Set_Cursor_Visibility(Current_Cursor_Visibility);
    end Initialize;
    
    procedure Finalize(self : in out Manager) is
@@ -31,6 +29,13 @@ package body Display is
       Curses.End_Windows;
    end Finalize;
 
+   procedure clear_char(column : Curses.Column_Position;
+                        row : Curses.Line_Position) is
+   begin
+      Curses.add(Column => column,
+                 Line => row,
+                 Ch => Item.Floor_Icon);
+   end clear_char;
    
    procedure clear is
    begin
@@ -42,17 +47,56 @@ package body Display is
       Curses.Refresh;
    end present;
    
-   procedure print(column : X_Pos; row : Y_Pos; text : String) is
+   procedure print(column : Curses.Column_Position; row : Curses.Line_Position;
+                   text : String) is
    begin
-      Curses.Add(Column => Curses.Column_Position(column), 
-                 Line => Curses.Line_Position(row),
+      Curses.Add(Column => column, 
+                 Line => row,
                  Str => text);
    end print;
    
-   procedure put(column : X_Pos; row : Y_Pos; letter : Character) is
+   procedure show_cursor is
    begin
-      Curses.add(Column => Curses.Column_Position(column),
-                 Line => Curses.Line_Position(row),
+      Current_Cursor_Visibility := Curses.Normal;
+      Curses.Set_Cursor_Visibility(Current_Cursor_Visibility);
+   end show_cursor;
+   
+   procedure hide_cursor is
+   begin
+      Current_Cursor_Visibility := Curses.Invisible;
+      Curses.Set_Cursor_Visibility(Current_Cursor_Visibility);
+   end hide_cursor;
+   
+   function has_cursor return Boolean is
+      use Curses;
+   begin
+      return Current_Cursor_Visibility = Curses.Normal;
+   end has_cursor;
+   
+   procedure move_cursor(column : Curses.Column_Position;
+                         row : Curses.Line_Position) is
+   begin
+      Curses.Move_Cursor(Line   => row,
+                         Column => column);
+   end move_cursor;
+   
+   procedure translate_cursor(dx : Curses.Column_Position;
+                              dy : Curses.Line_Position) is
+      use Curses;
+      current_x : Curses.Column_Position := 0;
+      current_y : Curses.Line_Position := 0;
+   begin
+      Curses.Get_Cursor_Position(Line => current_y,
+                                 Column => current_x);
+      Curses.Move_Cursor(Line   => current_y + dy,
+                         Column => current_x + dx);
+   end translate_cursor;
+   
+   procedure put(column : Curses.Column_Position; row : Curses.Line_Position;
+                 letter : Character) is
+   begin
+      Curses.add(Column => column,
+                 Line => row,
                  Ch => letter);
    end put;
    
@@ -98,4 +142,14 @@ package body Display is
          return Y_Pos(Line_Position(player_y) - visible_height / 2);
       end if;
    end calculate_camera_y;
+   
+   procedure log(message : Log_String) is
+   begin
+      print(0, 0, message);
+   end log;
+   
+   function get_input return Curses.Real_Key_Code is
+   begin
+      return Curses.Get_Keystroke;
+   end get_input;
 end Display;
