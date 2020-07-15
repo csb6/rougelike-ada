@@ -11,8 +11,8 @@ package Display is
    
    Map_Width : constant := 30; -- in cells
    Map_Height : constant := 30;
-   type X_Pos is new Terminal_Interface.Curses.Column_Position range 0 .. Map_Width;
-   type Y_Pos is new Terminal_Interface.Curses.Line_Position range 0 .. Map_Height;
+   subtype X_Pos is Curses.Column_Position range 0 .. Map_Width;
+   subtype Y_Pos is Curses.Line_Position range 0 .. Map_Height;
    
    subtype Log_String is String(1 .. 16);
    
@@ -40,6 +40,9 @@ package Display is
    function is_large_enough return Boolean;
    procedure log(message : Log_String);
    function get_input return Curses.Real_Key_Code;
+   
+   procedure draw(screen : in out Manager; map : in out Grid;
+                  player_x : X_Pos; player_y : Y_Pos);
 private
    Max_Log_Size : constant := 4; -- in number of messages
    type Log_Array is array(0 .. Max_Log_Size - 1) of Log_String;

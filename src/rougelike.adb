@@ -7,5 +7,4 @@ procedure Rougelike is
    board : Gameboard.Object;
 begin
    Gameboard.make(board);
-   Display.clear;
 end Rougelike;

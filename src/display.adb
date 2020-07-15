@@ -111,7 +111,7 @@ package body Display is
    function calculate_camera_x(player_x : X_Pos) return X_Pos is
       use Curses;
       -- The amount of width that can be used to show the map (with Map_Width as its max)
-      visible_width : Column_Position := Column_Position'Min(Map_Width, Curses.Columns);
+      visible_width : Column_Position := Column_Position'Min(Map_Width, Curses.Columns - 1);
    begin
       if (Column_Position(player_x) < visible_width / 2) then
          -- If player is near left edge of map, lock the camera
@@ -129,7 +129,7 @@ package body Display is
    function calculate_camera_y(player_y : Y_Pos) return Y_Pos is
       use Curses;
       -- The amount of height that can be used to show the map (with Map_Height as its max)
-      visible_height : Line_Position := Line_Position'Min(Map_Height, Curses.Lines);
+      visible_height : Line_Position := Line_Position'Min(Map_Height, Curses.Lines - 1);
    begin
       if (Line_Position(player_y) < visible_height / 2) then
          -- If player is near top edge of map, lock the camera
@@ -152,4 +152,26 @@ package body Display is
    begin
       return Curses.Get_Keystroke;
    end get_input;
+   
+   procedure draw(screen : in out Manager; map : in out Grid;
+                  player_x : X_Pos; player_y : Y_Pos) is
+      use Curses;
+      curr_x : X_Pos := calculate_camera_x(player_x);
+      curr_y : Y_Pos := calculate_camera_y(player_y);
+      -- Draw as much of the grid as possible onto the screen
+      screen_width : constant Column_Position := Column_Position'Min(Columns - 1, Map_Width);
+      screen_height : constant Line_Position := Line_Position'Min(Lines - 1, Map_Height);
+   begin
+      screen.corner_x := curr_x;
+      screen.corner_y := curr_y;
+      
+      -- Draw on the screen row-by-row, obtaining the correct grid tiles
+      -- to display by offsetting from the corner coordinates
+      for row in Line_Position range 0 .. screen_height loop
+         for column in Column_Position range 0 .. screen_width loop
+            put(column, row,
+                map(row + screen.corner_y, column + screen.corner_x).icon);
+         end loop;
+      end loop;
+   end draw;
 end Display;
