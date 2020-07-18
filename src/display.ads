@@ -2,6 +2,11 @@ with Ada.Finalization;
 with Terminal_Interface.Curses;
 with Item;
 
+--TODO:
+--Consider breaking Grid into SoA (for icon and for Entity)
+--since characters in Grid could be a 2D array of chars, making cache usage
+--better. Also the icon and Entity are not going to be accessed often together 
+
 package Display is
    package Curses renames Terminal_Interface.Curses;
    
@@ -15,6 +20,11 @@ package Display is
    subtype Y_Pos is Curses.Line_Position range 0 .. Map_Height;
    
    subtype Log_String is String(1 .. 16);
+   
+   -- Some keycodes that NCurses doesn't define
+   -- Probably not portable on every terminal
+   Key_Ctrl_X : constant := 24;
+   Key_Ctrl_C : constant := 3;
    
    type Cell is record
       -- The ASCII character displayed on the terminal grid
