@@ -18,6 +18,12 @@ package Display is
    Map_Height : constant := 30;
    subtype X_Pos is Curses.Column_Position range 0 .. Map_Width;
    subtype Y_Pos is Curses.Line_Position range 0 .. Map_Height;
+   -- Need to expose operators of these types for the DX/DY declarations
+   use all type Curses.Column_Position;
+   use all type Curses.Line_Position;
+   -- Types used when using an offset for X_Pos/Y_Pos
+   type DX is range -X_Pos'Last .. X_Pos'Last;
+   type DY is range -Y_Pos'Last .. Y_Pos'Last;
    
    subtype Log_String is String(1 .. 16);
    
@@ -48,6 +54,8 @@ package Display is
                               dy : Curses.Line_Position);
    
    function is_large_enough return Boolean;
+   function width return Positive;
+   function height return Positive;
    procedure log(message : Log_String);
    function get_input return Curses.Real_Key_Code;
    

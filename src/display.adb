@@ -68,7 +68,7 @@ package body Display is
    end hide_cursor;
    
    function has_cursor return Boolean is
-      use Curses;
+      use all type Curses.Cursor_Visibility;
    begin
       return Current_Cursor_Visibility = Curses.Normal;
    end has_cursor;
@@ -82,7 +82,7 @@ package body Display is
    
    procedure translate_cursor(dx : Curses.Column_Position;
                               dy : Curses.Line_Position) is
-      use Curses;
+      use all type Curses.Column_Position, Curses.Line_Position;
       current_x : Curses.Column_Position := 0;
       current_y : Curses.Line_Position := 0;
    begin
@@ -101,11 +101,22 @@ package body Display is
    end put;
    
    function is_large_enough return Boolean is
-      use Curses; -- To make operators visible for Columns/Lines
+      use all type Curses.Column_Position, Curses.Line_Position;
    begin
       return Curses.Columns >= Min_Display_Width
         and then Curses.Lines >= Min_Display_Height;
    end is_large_enough;
+   
+   
+   function width return Positive is
+   begin
+      return Positive(Curses.Columns);
+   end width;
+   
+   function height return Positive is
+   begin
+      return Positive(Curses.Lines);
+   end height;
    
 -- Find map x-coordinate to place in the top-left corner of the screen
    function calculate_camera_x(player_x : X_Pos) return X_Pos is

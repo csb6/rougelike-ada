@@ -5,7 +5,7 @@ project Rougelike is
    for Main use ("rougelike.adb");
 
    package Linker is
-      for Switches ("ada") use ("-L./AdaCurses/lib", "-lAdaCurses");
+      for Switches ("ada") use ("-L./AdaCurses/lib", "-lAdaCurses", "-dead_strip");
    end Linker;
 
 end Rougelike;

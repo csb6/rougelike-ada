@@ -18,8 +18,9 @@ package Item is
 
    -- A range of id values; certain subsets are various types of items
    -- and others subsets are actors
-   type Entity_Id is range 0 .. 125;
+   type Entity_Id is range -1 .. 125;
    No_Entity : constant Entity_Id := 0;
+   Occupied_Tile : constant Entity_Id := -1;
    Floor_Icon : constant Character := '.';
    subtype Item_Id is Entity_Id range 1 .. 99;
    

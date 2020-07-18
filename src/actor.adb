@@ -67,5 +67,10 @@ package body Actor is
       
       self.size := self.size + 1;
    end add;
+   
+   function player_position(self : in out Actor_Table) return Position is
+   begin
+      return self.positions(Player_Id);
+   end player_position;
      
 end Actor;

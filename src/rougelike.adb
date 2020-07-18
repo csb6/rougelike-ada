@@ -4,13 +4,12 @@ with Gameboard;
 with Input;
 
 procedure Rougelike is
-   screen : Display.Manager;
    board : Gameboard.Object;
 begin
    Gameboard.make(board);
 
-   Display.clear;
+   Display.present;
    while(Input.handle(board)) loop
-      null;
+      Display.present;
    end loop;
 end Rougelike;

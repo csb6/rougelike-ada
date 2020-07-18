@@ -89,4 +89,5 @@ package Actor is
 
    procedure add(self : in out Actor_Table; kind : Actor_Type_Id;
                  pos : Position; hp : Health);
+   function player_position(self : in out Actor_Table) return Position;
 end Actor;
