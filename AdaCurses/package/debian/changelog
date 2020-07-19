@@ -1,0 +1,5 @@
+adacurses (6.2+20200212) unstable; urgency=low
+
+  * snapshot of ncurses subpackage for AdaCurses.
+
+ -- Thomas E. Dickey <dickey@invisible-island.net>  Wed, 12 Feb 2020 04:50:45 -0500
