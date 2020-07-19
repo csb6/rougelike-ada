@@ -67,11 +67,14 @@ package Actor is
       energies : Energy_Array;
       battle_stats : Battle_Stats_Array;
 
-      size : Actor_Type_Id := Actor_Type_Id'First;
+      size : Actor_Type_Id := 0;
    end record;
    
-   procedure add(self : in out Actor_Type_Table; icon : Character;
-                 name : Name_String; energy_val : Energy; stats : Battle_Stats)
+   procedure add(self : in out Actor_Type_Table;
+                 icon : Character;
+                 name : Name_String;
+                 energy_val : Energy := Energy'Last;
+                 stats : Battle_Stats)
      with Pre => self.size < self.icons'Last + 1;
 
 
@@ -84,10 +87,12 @@ package Actor is
       positions : Actor_Position_Array;
       healths : Actor_Health_Array;
 
-      size : Actor_Id := Actor_Id'First;
+      insert : Actor_Id := Actor_Id'First;
    end record;
 
-   procedure add(self : in out Actor_Table; kind : Actor_Type_Id;
-                 pos : Position; hp : Health);
+   procedure add(self : in out Actor_Table;
+                 kind : Actor_Type_Id;
+                 pos : Position;
+                 hp : Health := Health'Last);
    function player_position(self : in out Actor_Table) return Position;
 end Actor;

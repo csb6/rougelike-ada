@@ -18,6 +18,7 @@ private
       actor_types : Actor.Actor_Type_Table;
       item_types : Item.Item_Type_Table;
       actors : Actor.Actor_Table;
+      items : Actor.Inventory_Table;
       
       map : Display.Grid;
    end record;

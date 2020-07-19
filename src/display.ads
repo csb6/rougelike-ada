@@ -29,6 +29,7 @@ package Display is
    
    -- Some keycodes that NCurses doesn't define
    -- Probably not portable on every terminal
+   -- Obtain by calculating `[character ASCII code] & 0x1F`
    Key_Ctrl_X : constant := 24;
    Key_Ctrl_C : constant := 3;
    

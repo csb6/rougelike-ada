@@ -47,8 +47,11 @@ package body Actor is
    end add_stack;
 
 
-   procedure add(self : in out Actor_Type_Table; icon : Character;
-                 name : Name_String; energy_val : Energy; stats : Battle_Stats) is
+   procedure add(self : in out Actor_Type_Table;
+                 icon : Character;
+                 name : Name_String;
+                 energy_val : Energy := Energy'Last;
+                 stats : Battle_Stats) is
    begin
       self.icons(self.size) := icon;
       self.names(self.size) := name;
@@ -58,14 +61,16 @@ package body Actor is
       self.size := self.size + 1;
    end add;
    
-   procedure add(self : in out Actor_Table; kind : Actor_Type_Id;
-                 pos : Position; hp : Health) is
+   procedure add(self : in out Actor_Table;
+                 kind : Actor_Type_Id;
+                 pos : Position;
+                 hp : Health := Health'Last) is
    begin
-      self.kinds(self.size) := kind;
-      self.positions(self.size) := pos;
-      self.healths(self.size) := hp;
+      self.kinds(self.insert) := kind;
+      self.positions(self.insert) := pos;
+      self.healths(self.insert) := hp;
       
-      self.size := self.size + 1;
+      self.insert := self.insert + 1;
    end add;
    
    function player_position(self : in out Actor_Table) return Position is

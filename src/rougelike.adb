@@ -1,4 +1,3 @@
-with Actor;
 with Display;
 with Gameboard;
 with Input;
