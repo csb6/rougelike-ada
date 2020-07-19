@@ -53,7 +53,7 @@ package Actor is
    procedure add_stack(self : in out Inventory_Table;
                        actor : Actor_Id; item : Item_Id;
                        count : Natural)
-     with Pre => self.size < self.actor_ids'Last + 1;
+     with Pre => self.size <= self.actor_ids'Last;
 
 
    type Icon_Array is array(Actor_Type_Id) of Character;

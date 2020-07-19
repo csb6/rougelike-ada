@@ -1,3 +1,5 @@
+with Terminal_Interface.Curses;
+
 package body Gameboard is
 
    procedure make(self : in out Object) is
@@ -13,7 +15,7 @@ package body Gameboard is
                       pos  => (0, 0));
 
       self.map(0, 0) := ('@', Actor.Player_Id);
-      self.map(23, 15) := ('d', 0);
+      self.map(23, 15) := ('d', Item.Item_Id'First);
 
       Display.clear;
       self.screen.draw(self.map, 0, 0);
@@ -67,10 +69,24 @@ package body Gameboard is
    end translate_player;
 
    procedure redraw_resize(self : in out Object) is
-      player_position : constant Actor.Position := self.actors.player_position;
    begin
       Display.clear;
-      self.screen.draw(self.map, player_position.x, player_position.y);
+      if (Display.is_large_enough) then
+         declare
+            player_position : constant Actor.Position := self.actors.player_position;
+         begin
+            self.screen.draw(self.map, player_position.x, player_position.y);
+         end;
+      else
+         Display.print(0, 0, "Screen too small");
+      end if;
+   exception
+      when Terminal_Interface.Curses.Curses_Exception =>
+         -- When width gets too small, ncurses throws an exception before
+         -- the above code gets a chance to run, so need to catch the exception
+         -- to let the user know
+         Display.clear;
+         Display.print(0, 0, "Screen too small");
    end redraw_resize;
 
 end Gameboard;
