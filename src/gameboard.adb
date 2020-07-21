@@ -1,6 +1,11 @@
 with Terminal_Interface.Curses;
+with Config;
+with Ada.Text_IO;
 
 package body Gameboard is
+
+   procedure load_actor_types(self : in out Object);
+   procedure load_item_types(self : in out Object);
 
    procedure make(self : in out Object) is
    begin
@@ -17,7 +22,8 @@ package body Gameboard is
       self.map(0, 0) := ('@', Actor.Player_Id);
       self.map(23, 15) := ('d', Item.Item_Id'First);
 
-      Display.clear;
+      self.load_actor_types;
+
       self.screen.draw(self.map, 0, 0);
    end make;
 
@@ -88,5 +94,55 @@ package body Gameboard is
          Display.clear;
          Display.print(0, 0, "Screen too small");
    end redraw_resize;
+
+
+
+   procedure load_actor_types(self : in out Object) is
+      type_file : Config.Configuration;
+      sections : Config.Section_List;
+      line : Terminal_Interface.Curses.Line_Position := 0;
+
+      -- The Actor_Type fields
+      icon : Character;
+      name : Item.Name_String;
+      energy : Actor.Energy;
+      stats : Actor.Battle_Stats;
+   begin
+      type_file.Init("data/actors.ini");
+      -- Each section corresponds to one actor type
+      sections := type_file.Read_Sections;
+
+      for actor_type of sections loop
+         if actor_type'Length > 0 then
+            declare
+               value : String := type_file.Value_Of(Section => actor_type,
+                                                    Mark    => "icon",
+                                                    Default => "?");
+            begin
+               icon := value(value'First);
+            end;
+            name := Item.add_padding(actor_type); -- Section heading is the type's name
+            energy := Actor.Energy(type_file.Value_Of(Section => actor_type,
+                                                      Mark    => "energy",
+                                                      Default => 3));
+            stats.attack := Actor.Attack_Value(type_file.Value_Of(Section => actor_type,
+                                                                  Mark    => "attack",
+                                                                  Default => 0));
+            stats.defense := Actor.Defense_Value(type_file.Value_Of(Section => actor_type,
+                                                                    Mark    => "defense",
+                                                                    Default => 0));
+            stats.ranged_attack := Actor.Attack_Value(type_file.Value_Of(Section => actor_type,
+                                                                         Mark    => "ranged_attack",
+                                                                         Default => 0));
+
+            self.actor_types.add(icon, name, energy, stats);
+         end if;
+      end loop;
+   end load_actor_types;
+
+   procedure load_item_types(self : in out Object) is
+   begin
+      null;
+   end load_item_types;
 
 end Gameboard;

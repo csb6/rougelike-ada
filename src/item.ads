@@ -22,7 +22,7 @@ package Item is
    Floor_Icon : constant Character := '.';
    subtype Item_Id is Entity_Id range 1 .. 99;
    
-   subtype Weapon_Id is Item_Id range 1 .. 50;
+   subtype Weapon_Id is Item_Id range Item_Id'First .. 50;
    subtype Melee_Weapon_Id is Weapon_Id range Weapon_Id'First .. 25;
    subtype Ranged_Weapon_Id is Weapon_Id range Melee_Weapon_Id'Last + 1 .. Weapon_Id'Last;
    subtype Armor_Id is Item_Id range Weapon_Id'Last + 1 .. Item_Id'Last;
