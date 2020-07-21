@@ -5,16 +5,14 @@ with Ada.Text_IO;
 package body Gameboard is
 
    procedure load_actor_types(self : in out Object);
-   procedure load_item_types(self : in out Object);
+   procedure load_weapon_types(weapon_list : in out Item.Weapon_Type_Array;
+                               path : String);
 
    procedure make(self : in out Object) is
    begin
       self.actor_types.add(icon  => '@',
                            name  => Item.add_padding("Player"),
                            stats => (1, 1, 1));
-      self.item_types.add_melee_weapon(icon   => 'd',
-                                       name   => Item.add_padding("Dagger"),
-                                       attack => 3);
 
       self.actors.add(kind => Actor.Player_Type_Id,
                       pos  => (0, 0));
@@ -23,6 +21,8 @@ package body Gameboard is
       self.map(23, 15) := ('d', Item.Item_Id'First);
 
       self.load_actor_types;
+      load_weapon_types(self.item_types.melee_weapons, "data/melee-weapons.ini");
+      load_weapon_types(self.item_types.ranged_weapons, "data/ranged-weapons.ini");
 
       self.screen.draw(self.map, 0, 0);
    end make;
@@ -140,9 +140,38 @@ package body Gameboard is
       end loop;
    end load_actor_types;
 
-   procedure load_item_types(self : in out Object) is
+   procedure load_weapon_types(weapon_list : in out Item.Weapon_Type_Array;
+                               path : String) is
+      type_file : Config.Configuration;
+      sections : Config.Section_List;
+      line : Terminal_Interface.Curses.Line_Position := 0;
+      insert_index : Item.Weapon_Id := weapon_list'First;
+      use all type Item.Weapon_Id;
+
+      -- The Weapon_Type fields
+      icon : Character;
+      name : Item.Name_String;
+      attack : Natural;
    begin
-      null;
-   end load_item_types;
+      type_file.Init(path);
+      -- Each section corresponds to one weapon type
+      sections := type_file.Read_Sections;
+
+      for item_type of sections loop
+         declare
+            value : String := type_file.Value_Of(Section => item_type,
+                                                 Mark    => "icon",
+                                                 Default => "?");
+         begin
+            icon := value(value'First);
+         end;
+         name := Item.add_padding(item_type); -- Section heading is the type's name
+         attack := type_file.Value_Of(Section => item_type,
+                                      Mark    => "attack",
+                                      Default => 0);
+         weapon_list(insert_index) := (icon, name, attack);
+         insert_index := insert_index + 1;
+      end loop;
+   end load_weapon_types;
 
 end Gameboard;

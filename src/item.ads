@@ -27,8 +27,9 @@ package Item is
    subtype Ranged_Weapon_Id is Weapon_Id range Melee_Weapon_Id'Last + 1 .. Weapon_Id'Last;
    subtype Armor_Id is Item_Id range Weapon_Id'Last + 1 .. Item_Id'Last;
    
-   type Melee_Weapon_Type_Array is array(Melee_Weapon_Id) of Weapon_Type;
-   type Ranged_Weapon_Type_Array is array(Ranged_Weapon_Id) of Weapon_Type;
+   type Weapon_Type_Array is array(Weapon_Id range <>) of Weapon_Type;
+   subtype Melee_Weapon_Type_Array is Weapon_Type_Array (Melee_Weapon_Id);
+   subtype Ranged_Weapon_Type_Array is Weapon_Type_Array (Ranged_Weapon_Id);
    type Armor_Type_Array is array(Armor_Id) of Armor_Type;
    
    type Item_Type_Table is tagged record
