@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
-cd AdaCurses
+cd third_party/AdaCurses
 ./configure
 make
+cd ../..
+gprbuild
