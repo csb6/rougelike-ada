@@ -3,6 +3,8 @@ with Config;
 
 package body Gameboard is
 
+   package Curses renames Terminal_Interface.Curses;
+
    procedure load_actor_types(self : in out Object; path : String);
    procedure load_weapon_types(weapon_list : in out Item.Weapon_Type_Array;
                                path : String);
@@ -18,7 +20,7 @@ package body Gameboard is
                       pos  => (0, 0));
 
       self.map(0, 0) := ('@', Actor.Player_Id);
-      self.map(23, 15) := ('d', Item.Item_Id'First);
+      self.map(23, 15) := ('s', Item.Item_Id'First);
 
       self.load_actor_types("data/actors.ini");
       self.load_armor_types("data/armor.ini");
@@ -75,7 +77,40 @@ package body Gameboard is
       self.move(Actor.Player_Id, Display.X_Pos(new_x), Display.Y_Pos(new_y));
    end translate_player;
 
-   procedure redraw_resize(self : in out Object) is
+
+   procedure show_inventory(self : in out Object) is
+      start_index, end_index : Actor.Inventory_Index;
+      found_player : Boolean;
+   begin
+      found_player := self.items.find_range(Actor.Player_Id, start_index, end_index);
+      Display.print(0, 0, "Inventory (Backspace to exit):");
+      if (not found_player) then
+         Display.print(0, 1, "  Empty");
+      else
+         declare
+            curr_line : Curses.Line_Position := 1;
+            curr_id : Item.Item_Id;
+            curr_item_name : Item.Name_String;
+         begin
+            for index in Actor.Inventory_Index range start_index .. end_index loop
+               curr_id := self.items.stacks(index).id;
+               case curr_id is
+               when Item.Melee_Weapon_Id'Range =>
+                  curr_item_name := self.item_types.melee_weapons(curr_id).name;
+               when Item.Ranged_Weapon_Id'Range =>
+                  curr_item_name := self.item_types.ranged_weapons(curr_id).name;
+               when Item.Armor_Id'Range =>
+                  curr_item_name := self.item_types.armor(curr_id).name;
+               when others =>
+                  curr_item_name := Item.add_padding("Unknown Item");
+               end case;
+               Display.print(0, curr_line, "  " & curr_item_name);
+            end loop;
+         end;
+      end if;
+   end show_inventory;
+
+   procedure redraw(self : in out Object) is
    begin
       Display.clear;
       if (Display.is_large_enough) then
@@ -88,13 +123,13 @@ package body Gameboard is
          Display.print(0, 0, "Screen too small");
       end if;
    exception
-      when Terminal_Interface.Curses.Curses_Exception =>
+      when Curses.Curses_Exception =>
          -- When width gets too small, ncurses throws an exception before
          -- the above code gets a chance to run, so need to catch the exception
          -- to let the user know
          Display.clear;
          Display.print(0, 0, "Screen too small");
-   end redraw_resize;
+   end redraw;
 
 
 
@@ -104,7 +139,7 @@ package body Gameboard is
    procedure load_actor_types(self : in out Object; path : String) is
       type_file : Config.Configuration;
       sections : Config.Section_List;
-      line : Terminal_Interface.Curses.Line_Position := 0;
+      line : Curses.Line_Position := 0;
 
       -- The Actor_Type fields
       icon : Character;
@@ -152,7 +187,7 @@ package body Gameboard is
                                path : String) is
       type_file : Config.Configuration;
       sections : Config.Section_List;
-      line : Terminal_Interface.Curses.Line_Position := 0;
+      line : Curses.Line_Position := 0;
       insert_index : Item.Weapon_Id := weapon_list'First;
       use all type Item.Weapon_Id;
 
@@ -187,7 +222,7 @@ package body Gameboard is
    procedure load_armor_types(self : in out Object; path : String) is
       type_file : Config.Configuration;
       sections : Config.Section_List;
-      line : Terminal_Interface.Curses.Line_Position := 0;
+      line : Curses.Line_Position := 0;
 
       -- The Armor_Type fields
       icon : Character;

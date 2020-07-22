@@ -29,9 +29,10 @@ package Display is
    
    -- Some keycodes that NCurses doesn't define
    -- Probably not portable on every terminal
-   -- Obtain by calculating `[character's ASCII code] & 0x1F`
+   -- Obtain ctrl keys by calculating `[character's ASCII code] & 0x1F`
    Key_Ctrl_X : constant := 24;
    Key_Ctrl_C : constant := 3;
+   Key_Backspace_2 : constant := 127; -- for macOS
    
    type Cell is record
       -- The ASCII character displayed on the terminal grid

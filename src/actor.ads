@@ -50,6 +50,9 @@ package Actor is
       equipment : Equipment_Set;
    end record;
    
+   function find_range(self : Inventory_Table; actor : Actor_Id;
+                       first : out Inventory_Index; last : out Inventory_Index)
+                       return Boolean;
    procedure add_stack(self : in out Inventory_Table;
                        actor : Actor_Id; item : Item_Id;
                        count : Natural)

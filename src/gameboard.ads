@@ -19,10 +19,11 @@ package Gameboard is
    -- rather than an absolute position
    procedure translate_player(self : in out Object; dx : Display.DX;
                               dy : Display.DY);
+   procedure show_inventory(self : in out Object);
    -- Recalculates how/where to start drawing the screen and then
    -- clears/redraws the screen. Intended to be called when the user
-   -- resizes the terminal window
-   procedure redraw_resize(self : in out Object);
+   -- resizes the terminal window/needs to clear any UI drawn over board
+   procedure redraw(self : in out Object);
 private
    type Object is tagged record
       screen : Display.Manager;
