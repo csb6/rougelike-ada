@@ -1,12 +1,12 @@
 with Terminal_Interface.Curses;
 with Config;
-with Ada.Text_IO;
 
 package body Gameboard is
 
    procedure load_actor_types(self : in out Object);
    procedure load_weapon_types(weapon_list : in out Item.Weapon_Type_Array;
                                path : String);
+   procedure load_armor_types(self : in out Object);
 
    procedure make(self : in out Object) is
    begin
@@ -21,6 +21,7 @@ package body Gameboard is
       self.map(23, 15) := ('d', Item.Item_Id'First);
 
       self.load_actor_types;
+      self.load_armor_types;
       load_weapon_types(self.item_types.melee_weapons, "data/melee-weapons.ini");
       load_weapon_types(self.item_types.ranged_weapons, "data/ranged-weapons.ini");
 
@@ -173,5 +174,36 @@ package body Gameboard is
          insert_index := insert_index + 1;
       end loop;
    end load_weapon_types;
+
+   procedure load_armor_types(self : in out Object) is
+      type_file : Config.Configuration;
+      sections : Config.Section_List;
+      line : Terminal_Interface.Curses.Line_Position := 0;
+
+      -- The Armor_Type fields
+      icon : Character;
+      name : Item.Name_String;
+      defense : Natural;
+   begin
+      type_file.Init("data/armor.ini");
+      sections := type_file.Read_Sections;
+
+      for armor_type of sections loop
+         declare
+            value : String := type_file.Value_Of(Section => armor_type,
+                                                 Mark    => "icon",
+                                                 Default => "?");
+         begin
+            icon := value(value'First);
+         end;
+
+         name := Item.add_padding(armor_type);
+         defense := type_file.Value_Of(Section => armor_type,
+                                       Mark    => "defense",
+                                       Default => 0);
+
+         self.item_types.add_armor(icon, name, defense);
+      end loop;
+   end load_armor_types;
 
 end Gameboard;
