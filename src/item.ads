@@ -15,7 +15,7 @@ package Item is
    end record;
 
    -- A range of id values; certain subsets are various types of items
-   -- and others subsets are actors
+   -- and other subsets are actors
    type Entity_Id is range -1 .. 125;
    No_Entity : constant Entity_Id := 0;
    Occupied_Tile : constant Entity_Id := -1;

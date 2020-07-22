@@ -3,10 +3,10 @@ with Config;
 
 package body Gameboard is
 
-   procedure load_actor_types(self : in out Object);
+   procedure load_actor_types(self : in out Object; path : String);
    procedure load_weapon_types(weapon_list : in out Item.Weapon_Type_Array;
                                path : String);
-   procedure load_armor_types(self : in out Object);
+   procedure load_armor_types(self : in out Object; path : String);
 
    procedure make(self : in out Object) is
    begin
@@ -20,8 +20,8 @@ package body Gameboard is
       self.map(0, 0) := ('@', Actor.Player_Id);
       self.map(23, 15) := ('d', Item.Item_Id'First);
 
-      self.load_actor_types;
-      self.load_armor_types;
+      self.load_actor_types("data/actors.ini");
+      self.load_armor_types("data/armor.ini");
       load_weapon_types(self.item_types.melee_weapons, "data/melee-weapons.ini");
       load_weapon_types(self.item_types.ranged_weapons, "data/ranged-weapons.ini");
 
@@ -98,7 +98,10 @@ package body Gameboard is
 
 
 
-   procedure load_actor_types(self : in out Object) is
+   -- Get a list of actor "types" (kinds of actors) from an .INI file
+   -- and add them to self.actor_types, where they can be used as templates
+   -- for individual actors. Expects the player actor type to be already added
+   procedure load_actor_types(self : in out Object; path : String) is
       type_file : Config.Configuration;
       sections : Config.Section_List;
       line : Terminal_Interface.Curses.Line_Position := 0;
@@ -109,7 +112,7 @@ package body Gameboard is
       energy : Actor.Energy;
       stats : Actor.Battle_Stats;
    begin
-      type_file.Init("data/actors.ini");
+      type_file.Init(path);
       -- Each section corresponds to one actor type
       sections := type_file.Read_Sections;
 
@@ -141,6 +144,10 @@ package body Gameboard is
       end loop;
    end load_actor_types;
 
+   -- Get a list of weapon item types from an .INI file and adds them to an array.
+   -- Intended to be used either with Gameboard.Object.item_types.melee_weapons or
+   -- Gameboard.Object.item_types.ranged_weapons, so it is not directly coupled to the
+   -- Gameboard.Object type directly.
    procedure load_weapon_types(weapon_list : in out Item.Weapon_Type_Array;
                                path : String) is
       type_file : Config.Configuration;
@@ -175,7 +182,9 @@ package body Gameboard is
       end loop;
    end load_weapon_types;
 
-   procedure load_armor_types(self : in out Object) is
+   -- Get a list of armor item types from an .INI file and adds them to
+   -- Gameboard.Object.item_types.armor
+   procedure load_armor_types(self : in out Object; path : String) is
       type_file : Config.Configuration;
       sections : Config.Section_List;
       line : Terminal_Interface.Curses.Line_Position := 0;
@@ -185,7 +194,7 @@ package body Gameboard is
       name : Item.Name_String;
       defense : Natural;
    begin
-      type_file.Init("data/armor.ini");
+      type_file.Init(path);
       sections := type_file.Read_Sections;
 
       for armor_type of sections loop

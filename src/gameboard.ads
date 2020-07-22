@@ -3,13 +3,25 @@ with Item;
 with Display;
 
 package Gameboard is
+   -- Holds the game's main data structures, as well as most of the
+   -- game logic.
    type Object is tagged private;
 
+   -- Constructor for Gameboard.Object. Loads/sets-up the various
+   -- data structures holding kinds of actors/items, as well as
+   -- setting up the map
    procedure make(self : in out Object);
+   -- Performs an actor on behalf of an actor (e.g. changing position
+   -- or picking up an item)
    procedure move(self : in out Object; curr_actor : Actor.Actor_Id;
                   column : Display.X_Pos; row : Display.Y_Pos);
+   -- Same as mave(), but targets an offset of the current position
+   -- rather than an absolute position
    procedure translate_player(self : in out Object; dx : Display.DX;
                               dy : Display.DY);
+   -- Recalculates how/where to start drawing the screen and then
+   -- clears/redraws the screen. Intended to be called when the user
+   -- resizes the terminal window
    procedure redraw_resize(self : in out Object);
 private
    type Object is tagged record
