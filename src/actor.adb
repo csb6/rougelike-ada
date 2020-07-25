@@ -1,6 +1,5 @@
 package body Actor is
    
-   
    function find_range(self : Inventory_Table; actor : Actor_Id;
                        first : out Inventory_Index; last : out Inventory_Index)
                        return Boolean is
@@ -30,7 +29,7 @@ package body Actor is
    procedure add_stack(self : in out Inventory_Table;
                        actor : Actor_Id; item : Item_Id;
                        count : Natural) is
-      -- (Initially) The first element of the actor's sub-range
+      -- The first element of the actor's sub-range
       start_index : Inventory_Index;
       -- The last element of the actor's sub-range
       end_index : Inventory_Index;
@@ -78,8 +77,7 @@ package body Actor is
    
    procedure add(self : in out Actor_Table;
                  kind : Actor_Type_Id;
-                 pos : Position;
-                 hp : Health := Health'Last) is
+                 pos : Position; hp : Health) is
    begin
       self.kinds(self.insert) := kind;
       self.positions(self.insert) := pos;

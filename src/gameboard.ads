@@ -17,8 +17,8 @@ package Gameboard is
                   column : Display.X_Pos; row : Display.Y_Pos);
    -- Same as mave(), but targets an offset of the current position
    -- rather than an absolute position
-   procedure translate_player(self : in out Object; dx : Display.DX;
-                              dy : Display.DY);
+   procedure translate_player(self : in out Object; dx : Display.X_Offset;
+                              dy : Display.Y_Offset);
    procedure show_inventory(self : in out Object);
    -- Recalculates how/where to start drawing the screen and then
    -- clears/redraws the screen. Intended to be called when the user

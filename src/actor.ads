@@ -56,7 +56,7 @@ package Actor is
    procedure add_stack(self : in out Inventory_Table;
                        actor : Actor_Id; item : Item_Id;
                        count : Natural)
-     with Pre => self.size <= self.actor_ids'Last;
+     with Pre => self.size < self.actor_ids'Last;
 
 
    type Icon_Array is array(Actor_Type_Id) of Character;
@@ -96,6 +96,6 @@ package Actor is
    procedure add(self : in out Actor_Table;
                  kind : Actor_Type_Id;
                  pos : Position;
-                 hp : Health := Health'Last);
+                 hp : Health);
    function player_position(self : in out Actor_Table) return Position;
 end Actor;

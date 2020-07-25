@@ -5,7 +5,7 @@ package body Input is
    package Curses renames Terminal_Interface.Curses_Constants;
    
    function handle(board : in out Gameboard.Object) return Boolean is
-      use all type Display.DX, Display.DY;
+      use all type Display.X_Offset, Display.Y_Offset;
    begin
       case Display.get_input is
          when Display.Key_Ctrl_X | Display.Key_Ctrl_C =>

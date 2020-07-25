@@ -16,14 +16,11 @@ package Display is
    
    Map_Width : constant := 30; -- in cells
    Map_Height : constant := 30;
-   subtype X_Pos is Curses.Column_Position range 0 .. Map_Width;
-   subtype Y_Pos is Curses.Line_Position range 0 .. Map_Height;
-   -- Need to expose operators of these types for the DX/DY declarations
-   use all type Curses.Column_Position;
-   use all type Curses.Line_Position;
-   -- Types used when using an offset for X_Pos/Y_Pos
-   type DX is range -X_Pos'Last .. X_Pos'Last;
-   type DY is range -Y_Pos'Last .. Y_Pos'Last;
+   use all type Curses.Column_Position, Curses.Line_Position;
+   subtype X_Offset is Curses.Column_Position range -Map_Width .. Map_Width;
+   subtype Y_Offset is Curses.Line_Position range -Map_Height .. Map_Height;
+   subtype X_Pos is X_Offset range 0 .. X_Offset'Last;
+   subtype Y_Pos is Y_Offset range 0 .. Y_Offset'Last;
    
    subtype Log_String is String(1 .. 16);
    

@@ -17,7 +17,7 @@ package body Gameboard is
                            stats => (1, 1, 1));
 
       self.actors.add(kind => Actor.Player_Type_Id,
-                      pos  => (0, 0));
+                      pos  => (0, 0), hp => 5);
 
       self.map(0, 0) := ('@', Actor.Player_Id);
       self.map(23, 15) := ('s', Item.Item_Id'First);
@@ -32,7 +32,7 @@ package body Gameboard is
 
    procedure move(self : in out Object; curr_actor : Actor.Actor_Id;
                   column : Display.X_Pos; row : Display.Y_Pos) is
-      use Item;
+      use all type Item.Entity_Id;
       target : constant Item.Entity_Id := self.map(row, column).entity;
       actor_x : constant Display.X_Pos := self.actors.positions(curr_actor).x;
       actor_y : constant Display.Y_Pos := self.actors.positions(curr_actor).y;
@@ -69,12 +69,17 @@ package body Gameboard is
       end if;
    end move;
 
-   procedure translate_player(self : in out Object; dx : Display.DX;
-                              dy : Display.DY) is
-      new_x : constant Integer := Integer(self.actors.positions(Actor.Player_Id).x) + Integer(dx);
-      new_y : constant Integer := Integer(self.actors.positions(Actor.Player_Id).y) + Integer(dy);
+   procedure translate_player(self : in out Object; dx : Display.X_Offset;
+                              dy : Display.Y_Offset) is
+      use all type Curses.Column_Position, Curses.Line_Position;
+      new_x : Curses.Column_Position := self.actors.positions(Actor.Player_Id).x + dx;
+      new_y : Curses.Line_Position := self.actors.positions(Actor.Player_Id).y + dy;
    begin
-      self.move(Actor.Player_Id, Display.X_Pos(new_x), Display.Y_Pos(new_y));
+      if (new_x not in Display.X_Pos or else new_y not in Display.Y_Pos) then
+         -- Don't allow out-of-bounds moves
+         return;
+      end if;
+      self.move(Actor.Player_Id, new_x, new_y);
    end translate_player;
 
 
