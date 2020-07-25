@@ -30,6 +30,7 @@ package Display is
    Key_Ctrl_X : constant := 24;
    Key_Ctrl_C : constant := 3;
    Key_Backspace_2 : constant := 127; -- for macOS
+   Key_Escape : constant := 27;
    
    type Cell is record
       -- The ASCII character displayed on the terminal grid

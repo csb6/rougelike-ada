@@ -11,11 +11,11 @@ package body Input is
          when Display.Key_Ctrl_X | Display.Key_Ctrl_C =>
             -- Exit the game
             return False;
-         when Curses.Key_Up    => board.translate_player(0, -1);
-         when Curses.Key_Down  => board.translate_player(0, 1);
-         when Curses.Key_Right => board.translate_player(1, 0);
-         when Curses.Key_Left  => board.translate_player(-1, 0);
-         when Curses.Key_Resize | Curses.Key_Backspace | Display.Key_Backspace_2 =>
+         when Character'Pos('w') => board.translate_player(0, -1);
+         when Character'Pos('s') => board.translate_player(0, 1);
+         when Character'Pos('d') => board.translate_player(1, 0);
+         when Character'Pos('a') => board.translate_player(-1, 0);
+         when Curses.Key_Resize | Display.Key_Escape =>
             board.redraw;
          when Character'Pos('i') =>
             board.show_inventory;

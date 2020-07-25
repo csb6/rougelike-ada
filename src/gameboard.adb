@@ -88,7 +88,7 @@ package body Gameboard is
       found_player : Boolean;
    begin
       found_player := self.items.find_range(Actor.Player_Id, start_index, end_index);
-      Display.print(0, 0, "Inventory (Backspace to exit):");
+      Display.print(0, 0, "Inventory (ESC to exit):");
       if (not found_player) then
          Display.print(0, 1, "  Empty");
       else

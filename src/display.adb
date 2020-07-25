@@ -14,7 +14,7 @@ package body Display is
       Curses.Init_Screen;
       Curses.Set_Raw_Mode(True);
       Curses.Set_Echo_Mode(False);
-      Curses.Set_KeyPad_Mode(SwitchOn => True);
+      Curses.Set_KeyPad_Mode(SwitchOn => False);
       
       if (not Curses.Has_Colors) then
          raise Constraint_Error with "Terminal does not support color";
