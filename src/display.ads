@@ -56,20 +56,22 @@ package Display is
    function is_large_enough return Boolean;
    function width return Positive;
    function height return Positive;
-   procedure log(message : Log_String);
    function get_input return Curses.Real_Key_Code;
    
    procedure draw(screen : in out Manager; map : in out Grid;
                   player_x : X_Pos; player_y : Y_Pos);
+   procedure log(screen : in out Manager; message : String);
 private
    Max_Log_Size : constant := 4; -- in number of messages
-   type Log_Array is array(0 .. Max_Log_Size - 1) of Log_String;
+   type Log_Index is range 0 .. Max_Log_Size - 1;
+   type Log_Array is array(Log_Index) of Log_String;
    
    type Manager is new Ada.Finalization.Controlled with record
       corner_x : X_Pos := 0;
       corner_y : Y_Pos := 0;
       
       log : Log_Array;
+      log_insert : Log_Index := Log_Index'First;
    end record;
    -- Setup ncurses
    overriding procedure Initialize(self : in out Manager);

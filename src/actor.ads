@@ -3,8 +3,9 @@ with Display;
 
 package Actor is
    -- These are the variable stats for each actor
-   type Attack_Value is range 0 .. 50;
-   type Defense_Value is range 0 .. 50;
+   type Battle_Value is range 0 .. 50;
+   subtype Attack_Value is Battle_Value;
+   subtype Defense_Value is Battle_Value;
    type Energy is range 0 .. 5;
    type Health is range 0 .. 100;
 

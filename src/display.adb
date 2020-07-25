@@ -1,3 +1,5 @@
+with Ada.Strings.Fixed;
+
 package body Display is
 
    Min_Display_Width : constant := 30; -- in cells
@@ -154,11 +156,6 @@ package body Display is
       end if;
    end calculate_camera_y;
    
-   procedure log(message : Log_String) is
-   begin
-      print(0, 0, message);
-   end log;
-   
    function get_input return Curses.Real_Key_Code is
    begin
       return Curses.Get_Keystroke;
@@ -185,4 +182,21 @@ package body Display is
          end loop;
       end loop;
    end draw;
+   
+   function add_padding(message : String) return Log_String is
+      result : Log_String := Ada.Strings.Fixed.Head(message, Log_String'Length);
+   begin
+      return result;
+   end add_padding;
+   
+   procedure log(screen : in out Manager; message : String) is
+   begin
+      if (screen.log_insert = screen.log'Last) then
+         screen.log(screen.log'First .. screen.log'Last - 1) := screen.log(screen.log'First + 1 .. screen.log'Last);
+         screen.log(screen.log_insert) := add_padding(message);
+      else
+         screen.log(screen.log_insert) := add_padding(message);
+         screen.log_insert := screen.log_insert + 1;
+      end if;
+   end log;
 end Display;

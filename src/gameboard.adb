@@ -1,17 +1,28 @@
 with Terminal_Interface.Curses;
 with Config;
+with Ada.Numerics.Discrete_Random;
 
 package body Gameboard is
 
    package Curses renames Terminal_Interface.Curses;
 
+   --Setup RNG for determining who wins skill checks/battles
+   package Random_Battle_Value is new Ada.Numerics.Discrete_Random(Actor.Battle_Value);
+   rng : Random_Battle_Value.Generator;
+
    procedure load_actor_types(self : in out Object; path : String);
    procedure load_weapon_types(weapon_list : in out Item.Weapon_Type_Array;
                                path : String);
    procedure load_armor_types(self : in out Object; path : String);
+   function melee_attack(self : in out Object;
+                         attacker : Actor.Actor_Id; target : Actor.Actor_Id)
+                         return Boolean;
 
    procedure make(self : in out Object) is
    begin
+      -- Uniquely seed the RNG
+      Random_Battle_Value.Reset(rng);
+
       self.actor_types.add(icon  => '@',
                            name  => Item.add_padding("Player"),
                            stats => (1, 1, 1));
@@ -53,18 +64,30 @@ package body Gameboard is
             Display.clear;
             self.screen.draw(self.map, column, row);
          end;
-      elsif (target in Item.Item_Id'Range) then
+      elsif (target in Item.Item_Id) then
          -- Pickup the Item at the target square
-         declare
-            target_item : constant Item.Item_Id := Item.Item_Id(target);
-         begin
-            self.items.add_stack(actor => curr_actor,
-                                 item  => target_item,
-                                 count => 1);
-            self.map(row, column) := (Item.Floor_Icon, Item.No_Entity);
+         self.items.add_stack(actor => curr_actor,
+                              item  => target,
+                              count => 1);
+         self.map(row, column) := (Item.Floor_Icon, Item.No_Entity);
 
-            Display.clear;
-            self.screen.draw(self.map, actor_x, actor_y);
+         Display.clear;
+         self.screen.draw(self.map, actor_x, actor_y);
+      elsif (target in Actor.Actor_Id) then
+         -- Attack the actor at that position
+         declare
+            attacker_wins : Boolean := self.melee_attack(attacker => curr_actor,
+                                                         target => target);
+            attacker_type : Actor.Actor_Type_Id := self.actors.kinds(curr_actor);
+            target_type : Actor.Actor_Type_Id := self.actors.kinds(target);
+            attacker_name : Item.Name_String := self.actor_types.names(attacker_type);
+            target_name : Item.Name_String := self.actor_types.names(target_type);
+         begin
+            if (attacker_wins) then
+               self.screen.log(attacker_name & " attacked " & target_name);
+            else
+               self.screen.log(target_name & " attacked " & attacker_name);
+            end if;
          end;
       end if;
    end move;
@@ -136,6 +159,30 @@ package body Gameboard is
          Display.print(0, 0, "Screen too small");
    end redraw;
 
+
+   function melee_attack(self : in out Object;
+                         attacker : Actor.Actor_Id; target : Actor.Actor_Id)
+                         return Boolean is
+      use Random_Battle_Value;
+      use all type Actor.Battle_Value;
+
+      target_type : Actor.Actor_Type_Id := self.actors.kinds(target);
+      attacker_type : Actor.Actor_Type_Id := self.actors.kinds(attacker);
+
+      -- TODO: account for armor/weapons in each of these cumulative stats
+      target_defense : Actor.Battle_Value := self.actor_types.battle_stats(target_type).defense;
+      attacker_attack : Actor.Battle_Value := self.actor_types.battle_stats(attacker_type).attack;
+
+      -- >= midpoint: attacker wins
+      -- < midpoint: defender wins
+      midpoint : Actor.Battle_Value := (Actor.Battle_Value'Last + Actor.Battle_Value'First) / 2;
+   begin
+      -- Boost attacker's chance of winning if they have higher attack than target's defense
+      -- Boost target's chance of winning if they have higher defense than attacker's attack
+      midpoint := midpoint - (attacker_attack - target_defense);
+
+      return Random(rng) >= midpoint;
+   end melee_attack;
 
 
    -- Get a list of actor "types" (kinds of actors) from an .INI file
