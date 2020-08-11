@@ -4,9 +4,38 @@ project Rougelike is
    for Object_Dir use "obj";
    for Main use ("rougelike.adb");
 
+   type Build_Mode_Type is ("trace", "standard");
+   Build_Mode : Build_Mode_Type := external ("mode", "standard");
+
+   package Builder is
+      case Build_Mode is
+         when "trace" =>
+            -- Force recompile, debug
+            for Default_Switches("ada") use ("-f", "-g");
+         when others =>
+            null;
+      end case;
+   end Builder;
+
    package Linker is
-      for Switches ("ada") use ("-L./third_party/AdaCurses/lib", "-lAdaCurses", "-dead_strip");
+      case Build_Mode is
+         when "standard" =>
+            for Switches ("ada") use ("-L./third_party/AdaCurses/lib", "-lAdaCurses", "-dead_strip");
+         when "trace" =>
+            -- Support for exception tracing
+            for Switches ("ada") use ("-L./third_party/AdaCurses/lib", "-lAdaCurses", "-Wl,-no_pie");
+      end case;
    end Linker;
+
+   package Binder is
+      case Build_Mode is
+         when "trace" =>
+            -- Support for exception tracing
+            for Switches ("ada") use ("-E");
+         when others =>
+            null;
+      end case;
+   end Binder;
 
    package Ide is
       for Vcs_Kind use "git";
