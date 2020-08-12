@@ -1,22 +1,18 @@
 with Terminal_Interface.Curses;
-with Config;
 with Ada.Numerics.Discrete_Random;
-with Ada.Text_IO;
+with Gameboard.Data;
 
 package body Gameboard is
 
    package Curses renames Terminal_Interface.Curses;
+   use all type Curses.Column_Position, Curses.Line_Position, Item.Entity_Id,
+       Actor.Battle_Value;
 
    --Setup RNG for determining who wins skill checks/battles
    package Random_Battle_Value is new Ada.Numerics.Discrete_Random(Actor.Battle_Value);
    rng : Random_Battle_Value.Generator;
 
    -- Utility functions/procedures
-   procedure load_map(self : in out Object; path : String);
-   procedure load_actor_types(self : in out Object; path : String);
-   procedure load_weapon_types(weapon_list : in out Item.Weapon_Type_Array;
-                               path : String);
-   procedure load_armor_types(self : in out Object; path : String);
    function melee_attack(self : in out Object;
                          attacker : Actor.Actor_Id; target : Actor.Actor_Id)
                          return Boolean;
@@ -34,12 +30,12 @@ package body Gameboard is
       self.actors.add(kind => Actor.Player_Type_Id,
                       pos  => (0, 0), hp => 5);
 
-      self.load_actor_types("data/actors.ini");
-      self.load_armor_types("data/armor.ini");
-      load_weapon_types(self.item_types.melee_weapons, "data/melee-weapons.ini");
-      load_weapon_types(self.item_types.ranged_weapons, "data/ranged-weapons.ini");
+      Data.load_actor_types(self, "data/actors.ini");
+      Data.load_armor_types(self, "data/armor.ini");
+      Data.load_weapon_types(self.item_types.melee_weapons, "data/melee-weapons.ini");
+      Data.load_weapon_types(self.item_types.ranged_weapons, "data/ranged-weapons.ini");
 
-      self.load_map("data/map1.txt");
+      Data.load_map(self, "data/map1.txt");
       self.map(0, 0) := ('@', Actor.Player_Id);
 
       self.screen.draw(self.map, 0, 0);
@@ -47,7 +43,6 @@ package body Gameboard is
 
    procedure move(self : in out Object; curr_actor : Actor.Actor_Id;
                   column : Display.X_Pos; row : Display.Y_Pos) is
-      use all type Item.Entity_Id;
       target : constant Item.Entity_Id := self.map(row, column).entity;
       actor_x : constant Display.X_Pos := self.actors.positions(curr_actor).x;
       actor_y : constant Display.Y_Pos := self.actors.positions(curr_actor).y;
@@ -98,7 +93,6 @@ package body Gameboard is
 
    procedure translate_player(self : in out Object; dx : Display.X_Offset;
                               dy : Display.Y_Offset) is
-      use all type Curses.Column_Position, Curses.Line_Position;
       new_x : Curses.Column_Position := self.actors.positions(Actor.Player_Id).x + dx;
       new_y : Curses.Line_Position := self.actors.positions(Actor.Player_Id).y + dy;
    begin
@@ -111,7 +105,6 @@ package body Gameboard is
 
 
    procedure show_inventory(self : in out Object) is
-      use all type Curses.Line_Position;
       start_index, end_index : Actor.Inventory_Index;
       found_player : Boolean;
    begin
@@ -124,9 +117,11 @@ package body Gameboard is
             curr_line : Curses.Line_Position := 1;
             curr_id : Item.Item_Id;
             curr_item_name : Item.Name_String;
+            curr_item_count : Natural;
          begin
             for index in Actor.Inventory_Index range start_index .. end_index loop
                curr_id := self.items.stacks(index).id;
+               curr_item_count := self.items.stacks(index).count;
                case curr_id is
                when Item.Melee_Weapon_Id'Range =>
                   curr_item_name := self.item_types.melee_weapons(curr_id).name;
@@ -137,8 +132,8 @@ package body Gameboard is
                when others =>
                   curr_item_name := Item.add_padding("Unknown Item");
                end case;
-               Display.print(0, curr_line, "  " & curr_item_name);
 
+               Display.print(0, curr_line, "  " & curr_item_name & "  " & curr_item_count'Image);
                curr_line := curr_line + 1;
             end loop;
          end;
@@ -171,7 +166,6 @@ package body Gameboard is
                          attacker : Actor.Actor_Id; target : Actor.Actor_Id)
                          return Boolean is
       use Random_Battle_Value;
-      use all type Actor.Battle_Value;
 
       target_type : Actor.Actor_Type_Id := self.actors.kinds(target);
       attacker_type : Actor.Actor_Type_Id := self.actors.kinds(attacker);
@@ -190,155 +184,5 @@ package body Gameboard is
 
       return Random(rng) >= midpoint;
    end melee_attack;
-
-   -- Given a plaintext file of characters, fills in the gameboard grid,
-   -- matching the character at each position to the item/monster it represents
-   procedure load_map(self : in out Object; path : String) is
-      use all type Curses.Line_Position, Curses.Column_Position, Item.Entity_Id;
-      map_file : Ada.Text_IO.File_Type;
-      curr_row : Display.Y_Pos := Display.Y_Pos'First;
-      curr_column : Display.X_Pos := Display.X_Pos'First;
-   begin
-      Ada.Text_IO.Open(map_file, Ada.Text_IO.In_File, path);
-
-      while (not Ada.Text_IO.End_Of_File(map_file)) loop
-         declare
-            file_line : constant String := Ada.Text_IO.Get_Line(map_file);
-         begin
-            curr_column := Display.X_Pos'First;
-            for letter of file_line loop
-               if (letter /= Item.Floor_Icon) then
-                  self.map(curr_row, curr_column).entity := self.item_types.find_id(letter);
-                  if (self.map(curr_row, curr_column).entity /= Item.No_Entity) then
-                     self.map(curr_row, curr_column).icon := letter;
-                  end if;
-               end if;
-
-               exit when curr_column + 1 not in Display.X_Pos;
-               curr_column := curr_column + 1;
-            end loop;
-         end;
-
-         exit when curr_row + 1 not in Display.Y_Pos;
-         curr_row := curr_row + 1;
-      end loop;
-   end load_map;
-
-   -- Get a list of actor "types" (kinds of actors) from an .INI file
-   -- and add them to self.actor_types, where they can be used as templates
-   -- for individual actors. Expects the player actor type to be already added
-   procedure load_actor_types(self : in out Object; path : String) is
-      type_file : Config.Configuration;
-      sections : Config.Section_List;
-      line : Curses.Line_Position := 0;
-
-      -- The Actor_Type fields
-      icon : Character;
-      name : Item.Name_String;
-      energy : Actor.Energy;
-      stats : Actor.Battle_Stats;
-   begin
-      type_file.Init(path);
-      -- Each section corresponds to one actor type
-      sections := type_file.Read_Sections;
-
-      for actor_type of sections loop
-         if actor_type'Length > 0 then
-            declare
-               value : String := type_file.Value_Of(Section => actor_type,
-                                                    Mark    => "icon",
-                                                    Default => "?");
-            begin
-               icon := value(value'First);
-            end;
-            name := Item.add_padding(actor_type); -- Section heading is the type's name
-            energy := Actor.Energy(type_file.Value_Of(Section => actor_type,
-                                                      Mark    => "energy",
-                                                      Default => 3));
-            stats.attack := Actor.Attack_Value(type_file.Value_Of(Section => actor_type,
-                                                                  Mark    => "attack",
-                                                                  Default => 0));
-            stats.defense := Actor.Defense_Value(type_file.Value_Of(Section => actor_type,
-                                                                    Mark    => "defense",
-                                                                    Default => 0));
-            stats.ranged_attack := Actor.Attack_Value(type_file.Value_Of(Section => actor_type,
-                                                                         Mark    => "ranged_attack",
-                                                                         Default => 0));
-
-            self.actor_types.add(icon, name, energy, stats);
-         end if;
-      end loop;
-   end load_actor_types;
-
-   -- Get a list of weapon item types from an .INI file and adds them to an array.
-   -- Intended to be used either with Gameboard.Object.item_types.melee_weapons or
-   -- Gameboard.Object.item_types.ranged_weapons, so it is not directly coupled to the
-   -- Gameboard.Object type directly.
-   procedure load_weapon_types(weapon_list : in out Item.Weapon_Type_Array;
-                               path : String) is
-      type_file : Config.Configuration;
-      sections : Config.Section_List;
-      line : Curses.Line_Position := 0;
-      insert_index : Item.Weapon_Id := weapon_list'First;
-      use all type Item.Weapon_Id;
-
-      -- The Weapon_Type fields
-      icon : Character;
-      name : Item.Name_String;
-      attack : Natural;
-   begin
-      type_file.Init(path);
-      -- Each section corresponds to one weapon type
-      sections := type_file.Read_Sections;
-
-      for item_type of sections loop
-         declare
-            value : String := type_file.Value_Of(Section => item_type,
-                                                 Mark    => "icon",
-                                                 Default => "?");
-         begin
-            icon := value(value'First);
-         end;
-         name := Item.add_padding(item_type); -- Section heading is the type's name
-         attack := type_file.Value_Of(Section => item_type,
-                                      Mark    => "attack",
-                                      Default => 0);
-         weapon_list(insert_index) := (icon, name, attack);
-         insert_index := insert_index + 1;
-      end loop;
-   end load_weapon_types;
-
-   -- Get a list of armor item types from an .INI file and adds them to
-   -- Gameboard.Object.item_types.armor
-   procedure load_armor_types(self : in out Object; path : String) is
-      type_file : Config.Configuration;
-      sections : Config.Section_List;
-      line : Curses.Line_Position := 0;
-
-      -- The Armor_Type fields
-      icon : Character;
-      name : Item.Name_String;
-      defense : Natural;
-   begin
-      type_file.Init(path);
-      sections := type_file.Read_Sections;
-
-      for armor_type of sections loop
-         declare
-            value : String := type_file.Value_Of(Section => armor_type,
-                                                 Mark    => "icon",
-                                                 Default => "?");
-         begin
-            icon := value(value'First);
-         end;
-
-         name := Item.add_padding(armor_type);
-         defense := type_file.Value_Of(Section => armor_type,
-                                       Mark    => "defense",
-                                       Default => 0);
-
-         self.item_types.add_armor(icon, name, defense);
-      end loop;
-   end load_armor_types;
 
 end Gameboard;
