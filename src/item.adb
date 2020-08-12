@@ -8,6 +8,31 @@ package body Item is
    end add_padding;
 
 
+
+   function find_id(self : in Item_Type_Table; icon : Character) return Entity_Id is
+   begin
+      for id in Melee_Weapon_Id'First .. self.melee_insert loop
+         if (self.melee_weapons(id).icon = icon) then
+            return id;
+         end if;
+      end loop;
+
+      for id in Ranged_Weapon_Id'First .. self.ranged_insert loop
+         if (self.ranged_weapons(id).icon = icon) then
+            return id;
+         end if;
+      end loop;
+
+      for id in Armor_Id'First .. self.armor_insert loop
+         if (self.armor(id).icon = icon) then
+            return id;
+         end if;
+      end loop;
+
+      return No_Entity;
+   end find_id;
+
+
    procedure add_melee_weapon(self : in out Item_Type_Table;
                               icon : Character; name : Name_String;
                               attack : Natural) is

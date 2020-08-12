@@ -42,6 +42,8 @@ package Item is
       armor_insert : Armor_Id := Armor_Id'First;
    end record;
    
+   function find_id(self : in Item_Type_Table; icon : Character) return Entity_Id;
+   
    procedure add_melee_weapon(self : in out Item_Type_Table;
                               icon : Character; name : Name_String;
                               attack : Natural);

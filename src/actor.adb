@@ -5,23 +5,25 @@ package body Actor is
                        return Boolean is
       found_first : Boolean := False;
    begin
-      first := self.size;
-      last := self.size;
-
-      if (self.size /= 0) then
-         -- Only search if anything exists to search through
-         Search_Loop:
-         -- Find the bounds of the actor's sub-range
-         for index in Inventory_Index range self.actor_ids'First..self.size loop
-            if (not found_first and then self.actor_ids(index) = actor) then
-               first := index;
-               found_first := True;
-            elsif (found_first and then self.actor_ids(index) /= actor) then
-               last := index;
-               exit Search_Loop;
-            end if;
-         end loop Search_Loop;
+      first := Inventory_Index'First;
+      last := Inventory_Index'First;
+      
+      -- Only search if anything exists to search through
+      if (self.size = 0) then
+         return False;
       end if;
+
+      Search_Loop:
+      -- Find the bounds of the actor's sub-range
+      for index in Inventory_Index range self.actor_ids'First .. self.size loop
+         if (not found_first and then self.actor_ids(index) = actor) then
+            first := index;
+            found_first := True;
+         elsif (found_first and then self.actor_ids(index) /= actor) then
+            last := index - 1;
+            exit Search_Loop;
+         end if;
+      end loop Search_Loop;
 
       return found_first;
    end find_range;
@@ -41,7 +43,7 @@ package body Actor is
 
       if (found_actor) then
          -- Check if there is an existing stack for the given item for this actor
-         for index in Inventory_Index range start_index..end_index loop
+         for index in Inventory_Index range start_index .. end_index loop
             if (self.stacks(index).id = item) then
                -- Stack already exists for this actor, just add to it, stop
                self.stacks(index).count := self.stacks(index).count + count;

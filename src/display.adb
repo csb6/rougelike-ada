@@ -175,8 +175,8 @@ package body Display is
       
       -- Draw on the screen row-by-row, obtaining the correct grid tiles
       -- to display by offsetting from the corner coordinates
-      for row in Line_Position range 0 .. screen_height loop
-         for column in Column_Position range 0 .. screen_width loop
+      for row in Line_Position range 0 .. screen_height - 1 loop
+         for column in Column_Position range 0 .. screen_width - 1 loop
             put(column, row,
                 map(row + screen.corner_y, column + screen.corner_x).icon);
          end loop;

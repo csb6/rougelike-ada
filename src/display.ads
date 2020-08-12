@@ -17,8 +17,8 @@ package Display is
    Map_Width : constant := 30; -- in cells
    Map_Height : constant := 30;
    use all type Curses.Column_Position, Curses.Line_Position;
-   subtype X_Offset is Curses.Column_Position range -Map_Width .. Map_Width;
-   subtype Y_Offset is Curses.Line_Position range -Map_Height .. Map_Height;
+   subtype X_Offset is Curses.Column_Position range -Map_Width .. Map_Width - 1;
+   subtype Y_Offset is Curses.Line_Position range -Map_Height .. Map_Height - 1;
    subtype X_Pos is X_Offset range 0 .. X_Offset'Last;
    subtype Y_Pos is Y_Offset range 0 .. Y_Offset'Last;
    

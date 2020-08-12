@@ -1,6 +1,7 @@
 with Terminal_Interface.Curses;
 with Config;
 with Ada.Numerics.Discrete_Random;
+with Ada.Text_IO;
 
 package body Gameboard is
 
@@ -10,6 +11,8 @@ package body Gameboard is
    package Random_Battle_Value is new Ada.Numerics.Discrete_Random(Actor.Battle_Value);
    rng : Random_Battle_Value.Generator;
 
+   -- Utility functions/procedures
+   procedure load_map(self : in out Object; path : String);
    procedure load_actor_types(self : in out Object; path : String);
    procedure load_weapon_types(weapon_list : in out Item.Weapon_Type_Array;
                                path : String);
@@ -17,6 +20,7 @@ package body Gameboard is
    function melee_attack(self : in out Object;
                          attacker : Actor.Actor_Id; target : Actor.Actor_Id)
                          return Boolean;
+
 
    procedure make(self : in out Object) is
    begin
@@ -30,13 +34,13 @@ package body Gameboard is
       self.actors.add(kind => Actor.Player_Type_Id,
                       pos  => (0, 0), hp => 5);
 
-      self.map(0, 0) := ('@', Actor.Player_Id);
-      self.map(23, 15) := ('s', Item.Item_Id'First);
-
       self.load_actor_types("data/actors.ini");
       self.load_armor_types("data/armor.ini");
       load_weapon_types(self.item_types.melee_weapons, "data/melee-weapons.ini");
       load_weapon_types(self.item_types.ranged_weapons, "data/ranged-weapons.ini");
+
+      self.load_map("data/map1.txt");
+      self.map(0, 0) := ('@', Actor.Player_Id);
 
       self.screen.draw(self.map, 0, 0);
    end make;
@@ -107,6 +111,7 @@ package body Gameboard is
 
 
    procedure show_inventory(self : in out Object) is
+      use all type Curses.Line_Position;
       start_index, end_index : Actor.Inventory_Index;
       found_player : Boolean;
    begin
@@ -133,6 +138,8 @@ package body Gameboard is
                   curr_item_name := Item.add_padding("Unknown Item");
                end case;
                Display.print(0, curr_line, "  " & curr_item_name);
+
+               curr_line := curr_line + 1;
             end loop;
          end;
       end if;
@@ -184,6 +191,38 @@ package body Gameboard is
       return Random(rng) >= midpoint;
    end melee_attack;
 
+   -- Given a plaintext file of characters, fills in the gameboard grid,
+   -- matching the character at each position to the item/monster it represents
+   procedure load_map(self : in out Object; path : String) is
+      use all type Curses.Line_Position, Curses.Column_Position, Item.Entity_Id;
+      map_file : Ada.Text_IO.File_Type;
+      curr_row : Display.Y_Pos := Display.Y_Pos'First;
+      curr_column : Display.X_Pos := Display.X_Pos'First;
+   begin
+      Ada.Text_IO.Open(map_file, Ada.Text_IO.In_File, path);
+
+      while (not Ada.Text_IO.End_Of_File(map_file)) loop
+         declare
+            file_line : constant String := Ada.Text_IO.Get_Line(map_file);
+         begin
+            curr_column := Display.X_Pos'First;
+            for letter of file_line loop
+               if (letter /= Item.Floor_Icon) then
+                  self.map(curr_row, curr_column).entity := self.item_types.find_id(letter);
+                  if (self.map(curr_row, curr_column).entity /= Item.No_Entity) then
+                     self.map(curr_row, curr_column).icon := letter;
+                  end if;
+               end if;
+
+               exit when curr_column + 1 not in Display.X_Pos;
+               curr_column := curr_column + 1;
+            end loop;
+         end;
+
+         exit when curr_row + 1 not in Display.Y_Pos;
+         curr_row := curr_row + 1;
+      end loop;
+   end load_map;
 
    -- Get a list of actor "types" (kinds of actors) from an .INI file
    -- and add them to self.actor_types, where they can be used as templates
