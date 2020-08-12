@@ -10,6 +10,9 @@ package body Display is
    
    -- NCurses global variables
    Current_Cursor_Visibility : Curses.Cursor_Visibility := Curses.Invisible;
+   Cursor_Is_Visible : Boolean := False;
+   Cursor_X : Curses.Column_Position := 0;
+   Cursor_Y : Curses.Line_Position := 0;
    
    procedure Initialize(self : in out Manager) is
    begin
@@ -22,8 +25,7 @@ package body Display is
          raise Constraint_Error with "Terminal does not support color";
       end if;
       
-      Curses.Move_Cursor(Line => 0, Column => 0);
-      Curses.Set_Cursor_Visibility(Current_Cursor_Visibility);
+      Display.hide_cursor;
    end Initialize;
    
    procedure Finalize(self : in out Manager) is
@@ -46,7 +48,11 @@ package body Display is
 
    procedure present is
    begin
-      Curses.Refresh;
+      if (not has_cursor) then
+         Curses.Refresh;
+      else
+         Curses.Move_Cursor(Line => Cursor_Y, Column => Cursor_X);
+      end if;
    end present;
    
    procedure print(column : Curses.Column_Position; row : Curses.Line_Position;
@@ -61,37 +67,37 @@ package body Display is
    begin
       Current_Cursor_Visibility := Curses.Normal;
       Curses.Set_Cursor_Visibility(Current_Cursor_Visibility);
+      Curses.Move_Cursor(Line => Cursor_Y, Column => Cursor_X);
+      Cursor_Is_Visible := True;
    end show_cursor;
    
    procedure hide_cursor is
    begin
       Current_Cursor_Visibility := Curses.Invisible;
       Curses.Set_Cursor_Visibility(Current_Cursor_Visibility);
+      Cursor_Is_Visible := False;
    end hide_cursor;
    
    function has_cursor return Boolean is
       use all type Curses.Cursor_Visibility;
    begin
-      return Current_Cursor_Visibility = Curses.Normal;
+      return Cursor_Is_Visible;
    end has_cursor;
-   
-   procedure move_cursor(column : Curses.Column_Position;
-                         row : Curses.Line_Position) is
-   begin
-      Curses.Move_Cursor(Line   => row,
-                         Column => column);
-   end move_cursor;
    
    procedure translate_cursor(dx : Curses.Column_Position;
                               dy : Curses.Line_Position) is
       use all type Curses.Column_Position, Curses.Line_Position;
-      current_x : Curses.Column_Position := 0;
-      current_y : Curses.Line_Position := 0;
+      new_x : Curses.Column_Position := Cursor_X + dx;
+      new_y : Curses.Line_Position := Cursor_Y + dy;
    begin
-      Curses.Get_Cursor_Position(Line => current_y,
-                                 Column => current_x);
-      Curses.Move_Cursor(Line   => current_y + dy,
-                         Column => current_x + dx);
+      if (new_x not in Display.X_Pos or else new_y not in Display.Y_Pos
+          or else new_x >= Curses.Column_Position(Display.width)
+          or else new_y >= Curses.Line_Position(Display.height)) then
+         -- Don't allow out-of-bounds moves
+         return;
+      end if;
+      Cursor_X := new_x;
+      Cursor_Y := new_y;
    end translate_cursor;
    
    procedure put(column : Curses.Column_Position; row : Curses.Line_Position;
@@ -108,7 +114,6 @@ package body Display is
       return Curses.Columns >= Min_Display_Width
         and then Curses.Lines >= Min_Display_Height;
    end is_large_enough;
-   
    
    function width return Positive is
    begin
