@@ -1,5 +1,7 @@
 package Item is
    subtype Name_String is String(1 .. 16);
+   -- Strings have to have a length of exactly 16, so this function
+   -- adds any needed padding and removes any characters exceeding the limit
    function add_padding(name : String) return Name_String;
 
    type Weapon_Type is record
@@ -42,8 +44,11 @@ package Item is
       armor_insert : Armor_Id := Armor_Id'First;
    end record;
    
+   -- Map the given icon to the kind of item it represents; returns No_Entity if
+   -- no item types have the icon
    function find_id(self : in Item_Type_Table; icon : Character) return Entity_Id;
    
+   -- Add new types of items
    procedure add_melee_weapon(self : in out Item_Type_Table;
                               icon : Character; name : Name_String;
                               attack : Natural);
