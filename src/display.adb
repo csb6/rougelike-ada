@@ -1,6 +1,8 @@
 with Ada.Strings.Fixed;
 
 package body Display is
+   
+   use type Curses.Column_Position, Curses.Line_Position;
 
    Min_Display_Width : constant := 24; -- in cells
    Min_Display_Height : constant := 16;
@@ -79,14 +81,12 @@ package body Display is
    end hide_cursor;
    
    function has_cursor return Boolean is
-      use all type Curses.Cursor_Visibility;
    begin
       return Cursor_Is_Visible;
    end has_cursor;
    
    procedure translate_cursor(dx : Curses.Column_Position;
                               dy : Curses.Line_Position) is
-      use all type Curses.Column_Position, Curses.Line_Position;
       new_x : Curses.Column_Position := Cursor_X + dx;
       new_y : Curses.Line_Position := Cursor_Y + dy;
    begin
@@ -115,7 +115,6 @@ package body Display is
    end put;
    
    function is_large_enough return Boolean is
-      use all type Curses.Column_Position, Curses.Line_Position;
    begin
       return Curses.Columns >= Min_Display_Width
         and then Curses.Lines >= Min_Display_Height;

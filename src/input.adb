@@ -5,7 +5,7 @@ package body Input is
    package Curses renames Terminal_Interface.Curses_Constants;
    
    function handle(board : in out Gameboard.Object) return Boolean is
-      use all type Display.X_Offset, Display.Y_Offset;
+      use type Display.X_Offset, Display.Y_Offset;
       
       procedure make_move(dx : Display.X_Offset; dy : Display.Y_Offset) is
       begin

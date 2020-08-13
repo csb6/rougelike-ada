@@ -5,7 +5,7 @@ with Gameboard.Data;
 package body Gameboard is
 
    package Curses renames Terminal_Interface.Curses;
-   use all type Curses.Column_Position, Curses.Line_Position, Item.Entity_Id,
+   use type Curses.Column_Position, Curses.Line_Position, Item.Entity_Id,
        Actor.Battle_Value;
 
    --Setup RNG for determining who wins skill checks/battles

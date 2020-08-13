@@ -81,7 +81,6 @@ package Actor is
                  stats : Battle_Stats)
      with Pre => self.size < self.icons'Last + 1;
 
-
    type Actor_Type_Array is array(Actor_Id) of Actor_Type_Id;
    type Actor_Position_Array is array(Actor_Id) of Position;
    type Actor_Health_Array is array(Actor_Id) of Health;

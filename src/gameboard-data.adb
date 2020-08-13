@@ -3,7 +3,7 @@ with Config;
 
 package body Gameboard.Data is
    
-   use all type Item.Weapon_Id, Display.Y_Pos, Display.X_Pos;
+   use type Item.Weapon_Id, Display.Y_Pos, Display.X_Pos;
 
    procedure load_map(self : in out Object; path : String) is
       map_file : Ada.Text_IO.File_Type;
@@ -16,14 +16,20 @@ package body Gameboard.Data is
       while (not Ada.Text_IO.End_Of_File(map_file)) loop
          declare
             file_line : constant String := Ada.Text_IO.Get_Line(map_file);
+            -- Holds a potential match when trying to find what item type/
+            -- actor type each letter represents
+            entity_id : Item.Entity_Id;
          begin
             curr_column := Display.X_Pos'First;
             
             Column_Loop:
             for letter of file_line loop
                if (letter /= Item.Floor_Icon) then
-                  self.map(curr_row, curr_column).entity := self.item_types.find_id(letter);
-                  if (self.map(curr_row, curr_column).entity /= Item.No_Entity) then
+                  -- See if the letter represents some kind of item
+                  entity_id := self.item_types.find_id(letter);
+                  if (entity_id /= Item.No_Entity) then
+                     -- Letter represents a known item type
+                     self.map(curr_row, curr_column).entity := entity_id;
                      self.map(curr_row, curr_column).icon := letter;
                   end if;
                end if;
