@@ -32,6 +32,7 @@ package body Input is
             if (not Display.has_cursor) then
                Display.show_cursor;
             else
+               board.teleport_player_to_cursor;
                Display.hide_cursor;
             end if;
          when Curses.Key_Resize | Display.Key_Escape =>

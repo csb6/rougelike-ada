@@ -2,7 +2,7 @@ with Ada.Strings.Fixed;
 
 package body Display is
 
-   Min_Display_Width : constant := 30; -- in cells
+   Min_Display_Width : constant := 24; -- in cells
    Min_Display_Height : constant := 16;
    GUI_Width : constant := 10; -- in cells
    GUI_Height : constant := 10;
@@ -91,14 +91,20 @@ package body Display is
       new_y : Curses.Line_Position := Cursor_Y + dy;
    begin
       if (new_x not in Display.X_Pos or else new_y not in Display.Y_Pos
-          or else new_x >= Curses.Column_Position(Display.width)
-          or else new_y >= Curses.Line_Position(Display.height)) then
+          or else new_x >= Curses.Column_Position(Display.width) - 1
+          or else new_y >= Curses.Line_Position(Display.height) - 1) then
          -- Don't allow out-of-bounds moves
          return;
       end if;
       Cursor_X := new_x;
       Cursor_Y := new_y;
    end translate_cursor;
+   
+   procedure get_cursor_position(x : out Curses.Column_Position;
+                                 y : out Curses.Line_Position) is
+   begin
+      Curses.Get_Cursor_Position(Line => y, Column => x);
+   end get_cursor_position;
    
    procedure put(column : Curses.Column_Position; row : Curses.Line_Position;
                  letter : Character) is
@@ -204,4 +210,10 @@ package body Display is
          screen.log_insert := screen.log_insert + 1;
       end if;
    end log;
+   
+   procedure get_upper_left(screen : Manager; x : out X_Pos; y : out Y_Pos) is
+   begin
+      x := screen.corner_x;
+      y := screen.corner_y;
+   end get_upper_left;
 end Display;

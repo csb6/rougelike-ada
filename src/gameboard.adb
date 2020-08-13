@@ -41,7 +41,8 @@ package body Gameboard is
       self.screen.draw(self.map, 0, 0);
    end make;
 
-   procedure move(self : in out Object; curr_actor : Actor.Actor_Id;
+   procedure move(self : in out Object;
+                  curr_actor : Actor.Actor_Id := Actor.Player_Id;
                   column : Display.X_Pos; row : Display.Y_Pos) is
       target : constant Item.Entity_Id := self.map(row, column).entity;
       actor_x : constant Display.X_Pos := self.actors.positions(curr_actor).x;
@@ -87,9 +88,27 @@ package body Gameboard is
             else
                self.screen.log(target_name & " attacked " & attacker_name);
             end if;
+            Display.clear;
+            self.screen.draw(self.map, actor_x, actor_y);
          end;
       end if;
    end move;
+
+   procedure teleport_player_to_cursor(self : in out Object) is
+      cursor_x : Curses.Column_Position;
+      cursor_y : Curses.Line_Position;
+      corner_x : Display.X_Pos;
+      corner_y : Display.Y_Pos;
+   begin
+      Display.get_cursor_position(cursor_x, cursor_y);
+      self.screen.get_upper_left(corner_x, corner_y);
+      cursor_x := cursor_x + corner_x;
+      cursor_y := cursor_y + corner_y;
+
+      if (cursor_x in Display.X_Pos and then cursor_y in Display.Y_Pos) then
+         self.move(Actor.Player_Id, cursor_x, cursor_y);
+      end if;
+   end teleport_player_to_cursor;
 
    procedure translate_player(self : in out Object; dx : Display.X_Offset;
                               dy : Display.Y_Offset) is

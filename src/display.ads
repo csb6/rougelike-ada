@@ -50,6 +50,8 @@ package Display is
    function has_cursor return Boolean;
    procedure translate_cursor(dx : Curses.Column_Position;
                               dy : Curses.Line_Position);
+   procedure get_cursor_position(x : out Curses.Column_Position;
+                                 y : out Curses.Line_Position);
    
    function is_large_enough return Boolean;
    function width return Positive;
@@ -59,6 +61,7 @@ package Display is
    procedure draw(screen : in out Manager; map : in out Grid;
                   player_x : X_Pos; player_y : Y_Pos);
    procedure log(screen : in out Manager; message : String);
+   procedure get_upper_left(screen : Manager; x : out X_Pos; y : out Y_Pos);
 private
    Max_Log_Size : constant := 4; -- in number of messages
    type Log_Index is range 0 .. Max_Log_Size - 1;
