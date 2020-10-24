@@ -3,13 +3,21 @@ with Config;
 
 package body Gameboard.Data is
    
-   use type Item.Weapon_Id, Display.Y_Pos, Display.X_Pos;
+   use type Item.Weapon_Id, Display.Y_Pos, Display.X_Pos, Actor.Actor_Type_Id;
 
    procedure load_map(self : in out Object; path : String) is
       map_file : Ada.Text_IO.File_Type;
       curr_row : Display.Y_Pos := Display.Y_Pos'First;
       curr_column : Display.X_Pos := Display.X_Pos'First;
+      
+      -- Make some lookup tables to identify what kind of
+      -- entity (if any) each char in the map file represents 
+      actor_type_lookup : Actor.Icon_ActorType_Map.Map;
+      item_lookup : Item.Icon_Entity_Map.Map;
    begin
+      self.actor_types.make_lookup_map(actor_type_lookup);
+      self.item_types.make_lookup_map(item_lookup);
+      
       Ada.Text_IO.Open(map_file, Ada.Text_IO.In_File, path);
 
       Line_Loop:
@@ -25,10 +33,15 @@ package body Gameboard.Data is
             Column_Loop:
             for letter of file_line loop
                if (letter /= Item.Floor_Icon) then
-                  -- See if the letter represents some kind of item
-                  entity_id := self.item_types.find_id(letter);
-                  if (entity_id /= Item.No_Entity) then
+                  if (item_lookup.contains(letter)) then
                      -- Letter represents a known item type
+                     self.map(curr_row, curr_column).entity := item_lookup.element(letter);
+                     self.map(curr_row, curr_column).icon := letter;
+                  elsif (actor_type_lookup.contains(letter)) then
+                     -- See if the letter represents some kind of actor
+                     entity_id := self.actors.add(kind => actor_type_lookup.element(letter),
+                                                  pos  => (curr_column, curr_row),
+                                                  hp   => 100);
                      self.map(curr_row, curr_column).entity := entity_id;
                      self.map(curr_row, curr_column).icon := letter;
                   end if;
@@ -42,6 +55,7 @@ package body Gameboard.Data is
          exit Line_Loop when curr_row + 1 not in Display.Y_Pos;
          curr_row := curr_row + 1;
       end loop Line_Loop;
+      Ada.Text_IO.Close(map_file);
    end load_map;
 
    procedure load_actor_types(self : in out Object; path : String) is

@@ -77,19 +77,34 @@ package body Actor is
       self.size := self.size + 1;
    end add;
    
-   
-   procedure add(self : in out Actor_Table;
-                 kind : Actor_Type_Id;
-                 pos : Position; hp : Health) is
+   procedure make_lookup_map(self : Actor_Type_Table; table : out Icon_ActorType_Map.Map) is
+   begin
+      for type_id in self.icons'Range loop
+         table.include(self.icons(type_id), type_id);
+      end loop;
+   end make_lookup_map;
+
+   function add(self : in out Actor_Table;
+                kind : Actor_Type_Id;
+                pos : Position; hp : Health) return Actor_Id is
    begin
       self.kinds(self.insert) := kind;
       self.positions(self.insert) := pos;
       self.healths(self.insert) := hp;
       
       self.insert := self.insert + 1;
+      return self.insert - 1;
    end add;
    
-   function player_position(self : in out Actor_Table) return Position is
+   procedure add(self : in out Actor_Table;
+                 kind : Actor_Type_Id;
+                 pos : Position; hp : Health) is
+      temp : Actor_Id := self.add(kind, pos, hp);
+   begin
+      null;
+   end add;
+   
+   function player_position(self : Actor_Table) return Position is
    begin
       return self.positions(Player_Id);
    end player_position;

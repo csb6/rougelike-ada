@@ -1,3 +1,5 @@
+with Ada.Containers.Hashed_Maps;
+
 package Item is
    subtype Name_String is String(1 .. 16);
    -- Strings have to have a length of exactly 16, so this function
@@ -34,6 +36,12 @@ package Item is
    subtype Ranged_Weapon_Type_Array is Weapon_Type_Array (Ranged_Weapon_Id);
    type Armor_Type_Array is array(Armor_Id) of Armor_Type;
    
+   function hash(k : Character) return Ada.Containers.Hash_Type is (Ada.Containers.Hash_Type(Character'Pos(k)));
+   package Icon_Entity_Map is new Ada.Containers.Hashed_Maps(Key_Type        => Character,
+                                                             Element_Type    => Entity_Id,
+                                                             Hash            => hash,
+                                                             Equivalent_Keys => "=");
+   
    type Item_Type_Table is tagged record
       melee_weapons : Melee_Weapon_Type_Array;
       ranged_weapons : Ranged_Weapon_Type_Array;
@@ -44,9 +52,7 @@ package Item is
       armor_insert : Armor_Id := Armor_Id'First;
    end record;
    
-   -- Map the given icon to the kind of item it represents; returns No_Entity if
-   -- no item types have the icon
-   function find_id(self : in Item_Type_Table; icon : Character) return Entity_Id;
+   procedure make_lookup_map(self : Item_Type_Table; table : out Icon_Entity_Map.Map);
    
    -- Add new types of items
    procedure add_melee_weapon(self : in out Item_Type_Table;
@@ -58,5 +64,7 @@ package Item is
    procedure add_armor(self : in out Item_Type_Table;
                        icon : Character; name : Name_String;
                        defense : Natural);
+      
+  private
 
 end Item;

@@ -1,5 +1,6 @@
 with Item; use Item;
 with Display;
+with Ada.Containers.Hashed_Maps;
 
 package Actor is
    -- These are the variable stats for each actor
@@ -12,13 +13,13 @@ package Actor is
    type Equip_Slot is (Head, Chest, Legs, Feet, Melee, Ranged);
 
    -- Represents a certain 'type' or class of Actor (e.g. Tiger)
-   type Actor_Type_Id is range 0 .. 15;
+   type Actor_Type_Id is range 0 .. 16;
    -- Represents a certain Actor instance (e.g. Tony the Tiger)
    subtype Actor_Id is Entity_Id range Item_Id'Last + 1 .. Entity_Id'Last;
-   -- The player is their own type and instance. Both are at index 0
-   -- in their respective arrays
+   -- The player is their own type and instance. O in both Actor_Id arrays
+   -- and Actor_Type_Id arrays
    Player_Id : constant Actor_Id := Actor_Id'First;
-   Player_Type_id : constant Actor_Type_Id := Actor_Type_Id'First;
+   Player_Type_Id : constant Actor_Type_Id := Actor_Type_Id'First;
 
 
    type Battle_Stats is record
@@ -50,7 +51,6 @@ package Actor is
 
       equipment : Equipment_Set;
    end record;
-   
    function find_range(self : Inventory_Table; actor : Actor_Id;
                        first : out Inventory_Index; last : out Inventory_Index)
                        return Boolean;
@@ -61,6 +61,7 @@ package Actor is
 
 
    type Icon_Array is array(Actor_Type_Id) of Character;
+   type Icon_To_Actor_Map is array(Character) of Actor_Type_Id;
    type Name_Array is array(Actor_Type_Id) of Name_String;
    type Energy_Array is array(Actor_Type_Id) of Energy;
    type Battle_Stats_Array is array(Actor_Type_Id) of Battle_Stats;
@@ -73,13 +74,14 @@ package Actor is
 
       size : Actor_Type_Id := 0;
    end record;
-   
+   package Icon_ActorType_Map is new Ada.Containers.Hashed_Maps(Character, Actor_Type_Id, Item.hash, "=");
    procedure add(self : in out Actor_Type_Table;
                  icon : Character;
                  name : Name_String;
                  energy_val : Energy := Energy'Last;
                  stats : Battle_Stats)
      with Pre => self.size < self.icons'Last + 1;
+   procedure make_lookup_map(self : Actor_Type_Table; table : out Icon_ActorType_Map.Map);
 
    type Actor_Type_Array is array(Actor_Id) of Actor_Type_Id;
    type Actor_Position_Array is array(Actor_Id) of Position;
@@ -92,10 +94,14 @@ package Actor is
 
       insert : Actor_Id := Actor_Id'First;
    end record;
+   function add(self : in out Actor_Table;
+                kind : Actor_Type_Id;
+                pos : Position; hp : Health) return Actor_Id;
 
    procedure add(self : in out Actor_Table;
                  kind : Actor_Type_Id;
                  pos : Position;
                  hp : Health);
-   function player_position(self : in out Actor_Table) return Position;
+   function player_position(self : Actor_Table) return Position
+     with Inline => True;
 end Actor;
