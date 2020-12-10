@@ -48,6 +48,7 @@ package Display is
    procedure show_cursor;
    procedure hide_cursor;
    function has_cursor return Boolean;
+   procedure move_cursor(x : Curses.Column_Position; y : Curses.Line_Position);
    procedure translate_cursor(dx : Curses.Column_Position;
                               dy : Curses.Line_Position);
    procedure get_cursor_position(x : out Curses.Column_Position;

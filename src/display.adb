@@ -85,19 +85,24 @@ package body Display is
       return Cursor_Is_Visible;
    end has_cursor;
    
+   procedure move_cursor(x : Curses.Column_Position; y : Curses.Line_Position) is
+   begin
+      if (x not in Display.X_Pos or else y not in Display.Y_Pos
+          or else x >= Curses.Column_Position(Display.width) - 1
+          or else y >= Curses.Line_Position(Display.height) - 1) then
+         -- Don't allow out-of-bounds moves
+         return;
+      end if;
+      Cursor_X := x;
+      Cursor_Y := y;
+   end move_cursor;
+   
    procedure translate_cursor(dx : Curses.Column_Position;
                               dy : Curses.Line_Position) is
       new_x : Curses.Column_Position := Cursor_X + dx;
       new_y : Curses.Line_Position := Cursor_Y + dy;
    begin
-      if (new_x not in Display.X_Pos or else new_y not in Display.Y_Pos
-          or else new_x >= Curses.Column_Position(Display.width) - 1
-          or else new_y >= Curses.Line_Position(Display.height) - 1) then
-         -- Don't allow out-of-bounds moves
-         return;
-      end if;
-      Cursor_X := new_x;
-      Cursor_Y := new_y;
+      move_cursor(new_x, new_y);
    end translate_cursor;
    
    procedure get_cursor_position(x : out Curses.Column_Position;

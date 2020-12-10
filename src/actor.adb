@@ -79,7 +79,7 @@ package body Actor is
    
    procedure make_lookup_map(self : Actor_Type_Table; table : out Icon_ActorType_Map.Map) is
    begin
-      for type_id in self.icons'Range loop
+      for type_id in self.icons'First .. self.size loop
          table.include(self.icons(type_id), type_id);
       end loop;
    end make_lookup_map;

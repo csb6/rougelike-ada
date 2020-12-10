@@ -10,15 +10,15 @@ package body Item is
 
    procedure make_lookup_map(self : Item_Type_Table; table : out Icon_Entity_Map.Map) is
    begin
-      for type_id in self.melee_weapons'Range loop
+      for type_id in self.melee_weapons'First .. self.melee_insert loop
          table.include(self.melee_weapons(type_id).icon, type_id);
       end loop;
 
-      for type_id in self.ranged_weapons'Range loop
+      for type_id in self.ranged_weapons'First .. self.ranged_insert loop
          table.include(self.ranged_weapons(type_id).icon, type_id);
       end loop;
 
-      for type_id in self.armor'Range loop
+      for type_id in self.armor'First .. self.armor_insert loop
          table.include(self.armor(type_id).icon, type_id);
       end loop;
    end make_lookup_map;

@@ -25,6 +25,9 @@ package Gameboard is
    procedure translate_player(self : in out Object; dx : Display.X_Offset;
                               dy : Display.Y_Offset);
    
+   function player_position(self : Object) return Actor.Position;
+   procedure get_upper_left(self : Object; x : out Display.X_Pos; y : out Display.Y_Pos);
+   
    procedure show_inventory(self : in out Object);
 
    -- Recalculates how/where to start drawing the screen and then

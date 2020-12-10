@@ -123,6 +123,16 @@ package body Gameboard is
    end translate_player;
 
 
+   function player_position(self : Object) return Actor.Position is
+   begin
+      return self.actors.player_position;
+   end;
+
+   procedure get_upper_left(self : Object; x : out Display.X_Pos; y : out Display.Y_Pos) is
+   begin
+      self.screen.get_upper_left(x, y);
+   end;
+
    procedure show_inventory(self : in out Object) is
       start_index, end_index : Actor.Inventory_Index;
       found_player : Boolean;
