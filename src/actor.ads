@@ -16,8 +16,7 @@ package Actor is
    type Actor_Type_Id is range 0 .. 16;
    -- Represents a certain Actor instance (e.g. Tony the Tiger)
    subtype Actor_Id is Entity_Id range Item_Id'Last + 1 .. Entity_Id'Last;
-   -- The player is their own type and instance. O in both Actor_Id arrays
-   -- and Actor_Type_Id arrays
+
    Player_Id : constant Actor_Id := Actor_Id'First;
    Player_Type_Id : constant Actor_Type_Id := Actor_Type_Id'First;
 
@@ -41,8 +40,8 @@ package Actor is
    end record;
    type Actor_Id_Array is array(Inventory_Index) of Actor_Id;
    type Item_Stack_Array is array(Inventory_Index) of Item_Stack;
-   type Equipment_Set is array(Actor_Id, Equip_Slot) of Boolean;
-   pragma Pack (Equipment_Set); -- To make Equipment_Set a bitset
+   type Equipment_Set is array(Actor_Id, Equip_Slot) of Boolean
+     with Pack;
 
    type Inventory_Table is tagged record
       actor_ids : Actor_Id_Array;

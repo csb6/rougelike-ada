@@ -2,14 +2,14 @@ with Ada.Text_IO;
 with Config;
 
 package body Gameboard.Data is
-   
+
    use type Item.Weapon_Id, Display.Y_Pos, Display.X_Pos, Actor.Actor_Type_Id;
 
    procedure load_map(self : in out Object; path : String) is
       map_file : Ada.Text_IO.File_Type;
       curr_row : Display.Y_Pos := Display.Y_Pos'First;
       curr_column : Display.X_Pos := Display.X_Pos'First;
-      
+
       -- Make some lookup tables to identify what kind of
       -- entity (if any) each char in the map file represents 
       actor_type_lookup : Actor.Icon_ActorType_Map.Map;
@@ -21,7 +21,7 @@ package body Gameboard.Data is
       Ada.Text_IO.Open(map_file, Ada.Text_IO.In_File, path);
 
       Line_Loop:
-      while (not Ada.Text_IO.End_Of_File(map_file)) loop
+      while not Ada.Text_IO.End_Of_File(map_file) loop
          declare
             file_line : constant String := Ada.Text_IO.Get_Line(map_file);
             -- Holds a potential match when trying to find what item type/
@@ -32,12 +32,12 @@ package body Gameboard.Data is
             
             Column_Loop:
             for letter of file_line loop
-               if (letter /= Item.Floor_Icon) then
-                  if (item_lookup.contains(letter)) then
+               if letter /= Item.Floor_Icon then
+                  if item_lookup.contains(letter) then
                      -- Letter represents a known item type
                      self.map(curr_row, curr_column).entity := item_lookup.element(letter);
                      self.map(curr_row, curr_column).icon := letter;
-                  elsif (actor_type_lookup.contains(letter)) then
+                  elsif actor_type_lookup.contains(letter) then
                      -- See if the letter represents some kind of actor
                      entity_id := self.actors.add(kind => actor_type_lookup.element(letter),
                                                   pos  => (curr_column, curr_row),

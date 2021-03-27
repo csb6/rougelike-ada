@@ -48,11 +48,11 @@ package body Gameboard is
       actor_x : constant Display.X_Pos := self.actors.positions(curr_actor).x;
       actor_y : constant Display.Y_Pos := self.actors.positions(curr_actor).y;
    begin
-      if (target = Item.Occupied_Tile) then
+      if target = Item.Occupied_Tile then
          return;
       end if;
 
-      if (target = Item.No_Entity) then
+      if target = Item.No_Entity then
          -- Move the actor to a previously empty tile
          declare
             actor_icon : constant Character := self.map(actor_y, actor_x).icon;
@@ -64,7 +64,7 @@ package body Gameboard is
             Display.clear;
             self.screen.draw(self.map, column, row);
          end;
-      elsif (target in Item.Item_Id) then
+      elsif target in Item.Item_Id then
          -- Pickup the Item at the target square
          self.items.add_stack(actor => curr_actor,
                               item  => target,
@@ -73,7 +73,7 @@ package body Gameboard is
 
          Display.clear;
          self.screen.draw(self.map, actor_x, actor_y);
-      elsif (target in Actor.Actor_Id) then
+      elsif target in Actor.Actor_Id then
          -- Attack the actor at that position
          declare
             attacker_wins : Boolean := self.melee_attack(attacker => curr_actor,
@@ -83,7 +83,7 @@ package body Gameboard is
             attacker_name : Item.Name_String := self.actor_types.names(attacker_type);
             target_name : Item.Name_String := self.actor_types.names(target_type);
          begin
-            if (attacker_wins) then
+            if attacker_wins then
                self.screen.log(attacker_name & " attacked " & target_name);
             else
                self.screen.log(target_name & " attacked " & attacker_name);
@@ -105,7 +105,7 @@ package body Gameboard is
       cursor_x := cursor_x + corner_x;
       cursor_y := cursor_y + corner_y;
 
-      if (cursor_x in Display.X_Pos and then cursor_y in Display.Y_Pos) then
+      if cursor_x in Display.X_Pos and then cursor_y in Display.Y_Pos then
          self.move(Actor.Player_Id, cursor_x, cursor_y);
       end if;
    end teleport_player_to_cursor;
@@ -115,11 +115,9 @@ package body Gameboard is
       new_x : Curses.Column_Position := self.actors.positions(Actor.Player_Id).x + dx;
       new_y : Curses.Line_Position := self.actors.positions(Actor.Player_Id).y + dy;
    begin
-      if (new_x not in Display.X_Pos or else new_y not in Display.Y_Pos) then
-         -- Don't allow out-of-bounds moves
-         return;
+      if new_x in Display.X_Pos and then new_y in Display.Y_Pos then
+         self.move(Actor.Player_Id, new_x, new_y);
       end if;
-      self.move(Actor.Player_Id, new_x, new_y);
    end translate_player;
 
 
@@ -139,7 +137,7 @@ package body Gameboard is
    begin
       found_player := self.items.find_range(Actor.Player_Id, start_index, end_index);
       Display.print(0, 0, "Inventory (ESC to exit):");
-      if (not found_player) then
+      if not found_player then
          Display.print(0, 1, "  Empty");
       else
          declare
@@ -152,14 +150,12 @@ package body Gameboard is
                curr_id := self.items.stacks(index).id;
                curr_item_count := self.items.stacks(index).count;
                case curr_id is
-               when Item.Melee_Weapon_Id'Range =>
+               when Item.Melee_Weapon_Id =>
                   curr_item_name := self.item_types.melee_weapons(curr_id).name;
-               when Item.Ranged_Weapon_Id'Range =>
+               when Item.Ranged_Weapon_Id =>
                   curr_item_name := self.item_types.ranged_weapons(curr_id).name;
-               when Item.Armor_Id'Range =>
+               when Item.Armor_Id =>
                   curr_item_name := self.item_types.armor(curr_id).name;
-               when others =>
-                  curr_item_name := Item.add_padding("Unknown Item");
                end case;
 
                Display.print(0, curr_line, "  " & curr_item_name & "  " & curr_item_count'Image);
@@ -170,14 +166,12 @@ package body Gameboard is
    end show_inventory;
 
    procedure redraw(self : in out Object) is
+      player_position : Actor.Position;
    begin
       Display.clear;
-      if (Display.is_large_enough) then
-         declare
-            player_position : constant Actor.Position := self.actors.player_position;
-         begin
-            self.screen.draw(self.map, player_position.x, player_position.y);
-         end;
+      if Display.is_large_enough then
+         player_position := self.actors.player_position;
+         self.screen.draw(self.map, player_position.x, player_position.y);
       else
          Display.print(0, 0, "Screen too small");
       end if;
@@ -192,8 +186,7 @@ package body Gameboard is
 
 
    function melee_attack(self : in out Object;
-                         attacker : Actor.Actor_Id; target : Actor.Actor_Id)
-                         return Boolean is
+                         attacker : Actor.Actor_Id; target : Actor.Actor_Id) return Boolean is
       use Random_Battle_Value;
 
       target_type : Actor.Actor_Type_Id := self.actors.kinds(target);

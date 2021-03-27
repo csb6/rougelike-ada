@@ -7,19 +7,19 @@ package body Actor is
    begin
       first := Inventory_Index'First;
       last := Inventory_Index'First;
-      
+
       -- Only search if anything exists to search through
-      if (self.size = 0) then
+      if self.size = 0 then
          return False;
       end if;
 
       Search_Loop:
       -- Find the bounds of the actor's sub-range
-      for index in Inventory_Index range self.actor_ids'First .. self.size loop
-         if (not found_first and then self.actor_ids(index) = actor) then
+      for index in self.actor_ids'First .. self.size loop
+         if not found_first and then self.actor_ids(index) = actor then
             first := index;
             found_first := True;
-         elsif (found_first and then self.actor_ids(index) /= actor) then
+         elsif found_first and then self.actor_ids(index) /= actor then
             last := index - 1;
             exit Search_Loop;
          end if;
@@ -41,10 +41,10 @@ package body Actor is
       found_actor := self.find_range(actor, start_index, end_index);
       insert_index := start_index;
 
-      if (found_actor) then
+      if found_actor then
          -- Check if there is an existing stack for the given item for this actor
-         for index in Inventory_Index range start_index .. end_index loop
-            if (self.stacks(index).id = item) then
+         for index in start_index .. end_index loop
+            if self.stacks(index).id = item then
                -- Stack already exists for this actor, just add to it, stop
                self.stacks(index).count := self.stacks(index).count + count;
                return;
@@ -76,7 +76,7 @@ package body Actor is
 
       self.size := self.size + 1;
    end add;
-   
+
    procedure make_lookup_map(self : Actor_Type_Table; table : out Icon_ActorType_Map.Map) is
    begin
       for type_id in self.icons'First .. self.size loop
@@ -91,11 +91,11 @@ package body Actor is
       self.kinds(self.insert) := kind;
       self.positions(self.insert) := pos;
       self.healths(self.insert) := hp;
-      
+
       self.insert := self.insert + 1;
       return self.insert - 1;
    end add;
-   
+
    procedure add(self : in out Actor_Table;
                  kind : Actor_Type_Id;
                  pos : Position; hp : Health) is
@@ -103,10 +103,10 @@ package body Actor is
    begin
       null;
    end add;
-   
+
    function player_position(self : Actor_Table) return Position is
    begin
       return self.positions(Player_Id);
    end player_position;
-     
+
 end Actor;

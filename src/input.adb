@@ -9,7 +9,7 @@ package body Input is
       
       procedure make_move(dx : Display.X_Offset; dy : Display.Y_Offset) is
       begin
-         if (Display.has_cursor) then
+         if Display.has_cursor then
             Display.translate_cursor(dx, dy);
          else
             board.translate_player(dx, dy);
@@ -25,7 +25,7 @@ package body Input is
          when Character'Pos('d') => make_move(1, 0);
          when Character'Pos('a') => make_move(-1, 0);
          when Character'Pos('t') =>
-            if (not Display.has_cursor) then
+            if not Display.has_cursor then
                declare
                   player_pos : Actor.Position := board.player_position;
                   corner_x : Display.X_Pos;
@@ -44,8 +44,7 @@ package body Input is
             Display.hide_cursor;
          when Character'Pos('i') =>
             board.show_inventory;
-         when others =>
-            null;
+         when others => null;
       end case;
       
       return True;

@@ -9,11 +9,11 @@ with Item;
 
 package Display is
    package Curses renames Terminal_Interface.Curses;
-   
+
    -- Acts as Scope Guard; sets-up/cleans-up ncurses, and caches some state
    -- about the screen
    type Manager is new Ada.Finalization.Controlled with private;
-   
+
    Map_Width : constant := 30; -- in cells
    Map_Height : constant := 30;
    use all type Curses.Column_Position, Curses.Line_Position;
@@ -21,9 +21,9 @@ package Display is
    subtype Y_Offset is Curses.Line_Position range -Map_Height .. Map_Height - 1;
    subtype X_Pos is X_Offset range 0 .. X_Offset'Last;
    subtype Y_Pos is Y_Offset range 0 .. Y_Offset'Last;
-   
+
    subtype Log_String is String(1 .. 16);
-   
+
    -- Some keycodes that NCurses doesn't define
    -- Probably not portable on every terminal
    -- Obtain ctrl keys by calculating `[character's ASCII code] & 0x1F`
@@ -31,7 +31,7 @@ package Display is
    Key_Ctrl_C : constant := 3;
    Key_Backspace_2 : constant := 127; -- for macOS
    Key_Escape : constant := 27;
-   
+
    type Cell is record
       -- The ASCII character displayed on the terminal grid
       icon : Character := Item.Floor_Icon;
@@ -39,12 +39,12 @@ package Display is
       entity : Item.Entity_Id := Item.No_Entity;
    end record;
    type Grid is array(Y_Pos, X_Pos) of Cell;
-   
+
    procedure clear;
    procedure present;
    procedure print(column : Curses.Column_Position; row : Curses.Line_Position;
                    text : String);
-   
+
    procedure show_cursor;
    procedure hide_cursor;
    function has_cursor return Boolean;
@@ -53,12 +53,12 @@ package Display is
                               dy : Curses.Line_Position);
    procedure get_cursor_position(x : out Curses.Column_Position;
                                  y : out Curses.Line_Position);
-   
+
    function is_large_enough return Boolean;
    function width return Positive;
    function height return Positive;
    function get_input return Curses.Real_Key_Code;
-   
+
    procedure draw(screen : in out Manager; map : in out Grid;
                   player_x : X_Pos; player_y : Y_Pos);
    procedure log(screen : in out Manager; message : String);
@@ -67,7 +67,7 @@ private
    Max_Log_Size : constant := 4; -- in number of messages
    type Log_Index is range 0 .. Max_Log_Size - 1;
    type Log_Array is array(Log_Index) of Log_String;
-   
+
    type Manager is new Ada.Finalization.Controlled with record
       corner_x : X_Pos := 0;
       corner_y : Y_Pos := 0;

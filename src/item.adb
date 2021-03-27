@@ -2,9 +2,8 @@ with Ada.Strings.Fixed;
 
 package body Item is
    function add_padding(name : String) return Name_String is
-      result : Name_String := Ada.Strings.Fixed.Head(name, Name_String'Length);
    begin
-      return result;
+      return Ada.Strings.Fixed.Head(name, Name_String'Length);
    end add_padding;
 
 
@@ -26,19 +25,19 @@ package body Item is
    function find_id(self : in Item_Type_Table; icon : Character) return Entity_Id is
    begin
       for id in Melee_Weapon_Id'First .. self.melee_insert - 1 loop
-         if (self.melee_weapons(id).icon = icon) then
+         if self.melee_weapons(id).icon = icon then
             return id;
          end if;
       end loop;
 
       for id in Ranged_Weapon_Id'First .. self.ranged_insert - 1 loop
-         if (self.ranged_weapons(id).icon = icon) then
+         if self.ranged_weapons(id).icon = icon then
             return id;
          end if;
       end loop;
 
       for id in Armor_Id'First .. self.armor_insert - 1 loop
-         if (self.armor(id).icon = icon) then
+         if self.armor(id).icon = icon then
             return id;
          end if;
       end loop;

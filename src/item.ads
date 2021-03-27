@@ -20,22 +20,22 @@ package Item is
 
    -- A range of id values; certain subsets are various types of items
    -- and other subsets are actors
-   type Entity_Id is range -1 .. 125;
-   No_Entity : constant Entity_Id := 0;
-   Occupied_Tile : constant Entity_Id := -1;
+   type Entity_Id is range 0 .. 127;
+   No_Entity : constant Entity_Id := Entity_Id'First;
+   Occupied_Tile : constant Entity_Id := No_Entity + 1;
    Floor_Icon : constant Character := '.';
-   subtype Item_Id is Entity_Id range 1 .. 99;
-   
+   subtype Item_Id is Entity_Id range Occupied_Tile + 1 .. 99;
+
    subtype Weapon_Id is Item_Id range Item_Id'First .. 50;
    subtype Melee_Weapon_Id is Weapon_Id range Weapon_Id'First .. 25;
    subtype Ranged_Weapon_Id is Weapon_Id range Melee_Weapon_Id'Last + 1 .. Weapon_Id'Last;
    subtype Armor_Id is Item_Id range Weapon_Id'Last + 1 .. Item_Id'Last;
-   
+
    type Weapon_Type_Array is array(Weapon_Id range <>) of Weapon_Type;
    subtype Melee_Weapon_Type_Array is Weapon_Type_Array (Melee_Weapon_Id);
    subtype Ranged_Weapon_Type_Array is Weapon_Type_Array (Ranged_Weapon_Id);
    type Armor_Type_Array is array(Armor_Id) of Armor_Type;
-   
+
    function hash(k : Character) return Ada.Containers.Hash_Type is (Ada.Containers.Hash_Type(Character'Pos(k)));
    package Icon_Entity_Map is new Ada.Containers.Hashed_Maps(Key_Type        => Character,
                                                              Element_Type    => Entity_Id,

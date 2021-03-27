@@ -23,7 +23,7 @@ package body Display is
       Curses.Set_Echo_Mode(False);
       Curses.Set_KeyPad_Mode(SwitchOn => False);
       
-      if (not Curses.Has_Colors) then
+      if not Curses.Has_Colors then
          raise Constraint_Error with "Terminal does not support color";
       end if;
       
@@ -38,8 +38,7 @@ package body Display is
    procedure clear_char(column : Curses.Column_Position;
                         row : Curses.Line_Position) is
    begin
-      Curses.add(Column => column,
-                 Line => row,
+      Curses.add(Column => column, Line => row,
                  Ch => Item.Floor_Icon);
    end clear_char;
    
@@ -50,7 +49,7 @@ package body Display is
 
    procedure present is
    begin
-      if (not has_cursor) then
+      if not has_cursor then
          Curses.Refresh;
       else
          Curses.Move_Cursor(Line => Cursor_Y, Column => Cursor_X);
@@ -60,8 +59,7 @@ package body Display is
    procedure print(column : Curses.Column_Position; row : Curses.Line_Position;
                    text : String) is
    begin
-      Curses.Add(Column => column, 
-                 Line => row,
+      Curses.Add(Column => column, Line => row,
                  Str => text);
    end print;
    
@@ -87,9 +85,9 @@ package body Display is
    
    procedure move_cursor(x : Curses.Column_Position; y : Curses.Line_Position) is
    begin
-      if (x not in Display.X_Pos or else y not in Display.Y_Pos
-          or else x >= Curses.Column_Position(Display.width) - 1
-          or else y >= Curses.Line_Position(Display.height) - 1) then
+      if x not in Display.X_Pos or else y not in Display.Y_Pos
+        or else x >= Curses.Column_Position(Display.width) - 1
+        or else y >= Curses.Line_Position(Display.height) - 1 then
          -- Don't allow out-of-bounds moves
          return;
       end if;
@@ -114,8 +112,7 @@ package body Display is
    procedure put(column : Curses.Column_Position; row : Curses.Line_Position;
                  letter : Character) is
    begin
-      Curses.add(Column => column,
-                 Line => row,
+      Curses.add(Column => column, Line => row,
                  Ch => letter);
    end put;
    
@@ -135,34 +132,34 @@ package body Display is
       return Positive(Curses.Lines);
    end height;
    
--- Find map x-coordinate to place in the top-left corner of the screen
+   -- Find map x-coordinate to place in the top-left corner of the screen
    function calculate_camera_x(player_x : X_Pos) return X_Pos is
       use Curses;
-      -- The amount of width that can be used to show the map (with Map_Width as its max)
+      -- The amount of width that can be used to show the map
       visible_width : Column_Position := Column_Position'Min(Map_Width, Curses.Columns - 1);
    begin
-      if (Column_Position(player_x) < visible_width / 2) then
+      if Column_Position(player_x) < visible_width / 2 then
          -- If player is near left edge of map, lock the camera
          return 0;
-      elsif (Column_Position(player_x) >= Map_Width - visible_width / 2) then
+      elsif Column_Position(player_x) >= Map_Width - visible_width / 2 then
          -- If player is near right edge of map, lock the camera
          return X_Pos(Map_Width - visible_width);
       else
          -- Else, keep player in the middle of the displayed area
-         return X_Pos(Column_Position(player_x) - visible_width / 2);
+         return X_Pos(player_x - visible_width / 2);
       end if;
    end calculate_camera_x;
    
--- Find map y-coordinate to place in the top-left corner of the screen
+   -- Find map y-coordinate to place in the top-left corner of the screen
    function calculate_camera_y(player_y : Y_Pos) return Y_Pos is
       use Curses;
       -- The amount of height that can be used to show the map (with Map_Height as its max)
       visible_height : Line_Position := Line_Position'Min(Map_Height, Curses.Lines - 1);
    begin
-      if (Line_Position(player_y) < visible_height / 2) then
+      if Line_Position(player_y) < visible_height / 2 then
          -- If player is near top edge of map, lock the camera
          return 0;
-      elsif (Line_Position(player_y) >= Map_Width - visible_height / 2) then
+      elsif Line_Position(player_y) >= Map_Width - visible_height / 2 then
          -- If player is near bottom edge of map, lock the camera
          return Y_Pos(Map_Width - visible_height);
       else
@@ -187,26 +184,22 @@ package body Display is
    begin
       screen.corner_x := curr_x;
       screen.corner_y := curr_y;
-      
-      -- Draw on the screen row-by-row, obtaining the correct grid tiles
-      -- to display by offsetting from the corner coordinates
-      for row in Line_Position range 0 .. screen_height - 1 loop
-         for column in Column_Position range 0 .. screen_width - 1 loop
-            put(column, row,
-                map(row + screen.corner_y, column + screen.corner_x).icon);
+
+      for row in 0 .. screen_height - 1 loop
+         for column in 0 .. screen_width - 1 loop
+            put(column, row, map(row + screen.corner_y, column + screen.corner_x).icon);
          end loop;
       end loop;
    end draw;
    
    function add_padding(message : String) return Log_String is
-      result : Log_String := Ada.Strings.Fixed.Head(message, Log_String'Length);
    begin
-      return result;
+      return Ada.Strings.Fixed.Head(message, Log_String'Length);
    end add_padding;
    
    procedure log(screen : in out Manager; message : String) is
    begin
-      if (screen.log_insert = screen.log'Last) then
+      if screen.log_insert = screen.log'Last then
          screen.log(screen.log'First .. screen.log'Last - 1) := screen.log(screen.log'First + 1 .. screen.log'Last);
          screen.log(screen.log_insert) := add_padding(message);
       else
